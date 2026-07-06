@@ -31,6 +31,7 @@
   };
 
    environment.systemPackages = with pkgs; [
+   	tree
    	git
 	neovim
 	foot
@@ -38,6 +39,8 @@
    ];
 
   services.openssh.enable = true;
+
+  security.polkit.enable = true;
 
   hardware.graphics = {
 	enable = true;
