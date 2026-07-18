@@ -22,7 +22,7 @@ require("lazy").setup({
                         "ellisonleao/gruvbox.nvim",
                         priority = 1000,
                         config = function()
-                                vim.cmd.colorscheme("gruvbox")
+                            vim.cmd.colorscheme("gruvbox")
                         end,
                 },
         {
@@ -105,6 +105,13 @@ require("lazy").setup({
                                 })
                         end,
                 },
+                {
+                    "HakonHarnes/img-clip.nvim",
+                    event = "VeryLazy",
+                    keys = {
+                        { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
+                },
+}
         },
         checker = {
                 enabled = true,
