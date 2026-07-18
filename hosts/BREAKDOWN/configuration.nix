@@ -21,7 +21,7 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome Siljan";
-    extraGroups = [ "wheel" "scanner" "lp" ]; 
+    extraGroups = [ "wheel" "scanner" "lp" "video"]; 
     packages = with pkgs; [];
   };
 
@@ -36,15 +36,26 @@
 	neovim
 	foot
 	firefox
+    brightnessctl
+
+    # scanner
+    sane-backends
+    simple-scan
    ];
 
+# scanner
+    hardware.sane.enable = true;
+
   services.openssh.enable = true;
+  services.netbird.enable = true;
 
   security.polkit.enable = true;
 
   hardware.graphics = {
 	enable = true;
   };
+
+  networking.firewall.allowedTCPPorts = [ 8912 ];
 
   system.stateVersion = "25.11"; 
 
