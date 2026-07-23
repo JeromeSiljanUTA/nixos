@@ -72,6 +72,7 @@ require("lazy").setup({
 						python = { "black", "isort" },
 						go = { "goimports", "gofmt" },
 						lua = { "stylua" },
+						nix = { "alejandra" },
 					},
 				})
 
