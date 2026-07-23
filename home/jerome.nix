@@ -22,6 +22,7 @@
 			"Mod4+Return" = "exec foot";
 			"Mod4+Shift+c" = "kill";
 			"Mod4+n" = "exec wofi --show drun";
+			"Mod4+w" = "layout toggle tabbed split";
 
 			# workspaces
 			"Mod4+a" = "workspace 1:a";
