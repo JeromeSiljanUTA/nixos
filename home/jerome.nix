@@ -142,6 +142,10 @@
     wdisplays
     pwvucontrol
 
+    # formatters
+    alejandra
+    stylua
+
     ibm-plex
 
 	fzf
