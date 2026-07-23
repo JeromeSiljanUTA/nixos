@@ -1,17 +1,19 @@
-{ config, lib, pkgs, ... }:
-
 {
-  imports =
-    [ 
-      ./hardware-configuration.nix
-    ];
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "MEGATRON"; 
+  networking.hostName = "MEGATRON";
 
   time.timeZone = "America/Chicago";
 
@@ -20,44 +22,44 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome Siljan";
-    extraGroups = [ "wheel" "scanner" "lp" "video"]; 
+    extraGroups = ["wheel" "scanner" "lp" "video"];
     packages = with pkgs; [];
   };
 
   programs.sway = {
-  	enable = true;
-  	wrapperFeatures.gtk = true;
-    extraOptions = [ "--unsupported-gpu" ];
+    enable = true;
+    wrapperFeatures.gtk = true;
+    extraOptions = ["--unsupported-gpu"];
   };
 
-   environment.systemPackages = with pkgs; [
-   	tree
-   	git
-	neovim
-	foot
-	firefox
+  environment.systemPackages = with pkgs; [
+    tree
+    git
+    neovim
+    foot
+    firefox
 
     # scanner
     sane-backends
     simple-scan
-   ];
+  ];
 
-# scanner
-    hardware.sane.enable = true;
+  # scanner
+  hardware.sane.enable = true;
 
   services.openssh.enable = true;
   services.netbird.enable = true;
 
   security.polkit.enable = true;
 
-# nvidia
+  # nvidia
   hardware.graphics = {
-	enable = true;
+    enable = true;
     enable32Bit = true;
   };
 
   nixpkgs.config.allowUnfree = true;
-  services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver.videoDrivers = ["nvidia"];
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;
@@ -65,7 +67,5 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
-  system.stateVersion = "25.11"; 
-
+  system.stateVersion = "25.11";
 }
-
