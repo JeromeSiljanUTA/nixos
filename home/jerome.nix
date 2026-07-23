@@ -56,18 +56,14 @@
         "Mod4+Print" = ''exec sh -c 'grim -g "$(slurp -d)" - | wl-copy -t image/png' '';
       };
 
-      startup = [
-        # nothing on startup
-      ];
-    };
-  };
-
-  wayland.windowManager.sway.config.output = {
-    DP-3 = {
-      scale = "1";
-    };
-    eDP-1 = {
-      scale = "1.5";
+      output = {
+        DP-3 = {
+          scale = "1";
+        };
+        eDP-1 = {
+          scale = "1.5";
+        };
+      };
     };
   };
 
