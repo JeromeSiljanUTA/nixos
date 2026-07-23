@@ -59,6 +59,15 @@
 	};
   };
 
+  wayland.windowManager.sway.config.output = {
+    DP-3 = {
+        scale = "1";
+    };
+    eDP-1 = {
+        scale = "1.5";
+    };
+  };
+
 
   home.sessionVariables = {
 	XDG_CURRENT_DESKTOP = "sway";
@@ -94,7 +103,7 @@
     enable = true;
     settings = {
         main = {
-            font = "IBM Plex Mono:size=8";
+            font = "IBM Plex Mono:size=10";
             dpi-aware = "yes";
             initial-color-theme = "light";
         };

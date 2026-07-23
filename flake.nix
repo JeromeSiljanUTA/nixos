@@ -45,5 +45,20 @@
 				}
 			];
 		};
+		nixosConfigurations.MEGATRON = nixpkgs.lib.nixosSystem {
+			modules = [
+				./hosts/MEGATRON/configuration.nix
+
+				home-manager.nixosModules.home-manager 
+
+				{
+					home-manager.useGlobalPkgs = true;
+					home-manager.useUserPackages = true;
+
+					home-manager.users.jerome = 
+						import ./home/jerome.nix;
+				}
+			];
+		};
 	};
 }
