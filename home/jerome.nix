@@ -81,9 +81,12 @@
 
   programs.git = {
     enable = true;
-    settings.user = {
-      name = "Jerome Siljan";
-      email = "JeromeSiljan@gmail.com";
+    settings = {
+      push.autoSetupRemote = true;
+      user = {
+        name = "Jerome Siljan";
+        email = "JeromeSiljan@gmail.com";
+      };
     };
   };
 
