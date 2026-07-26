@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ../../common/desktop/sway.nix
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
@@ -27,8 +28,6 @@
   };
 
   programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
     extraOptions = ["--unsupported-gpu"];
   };
 

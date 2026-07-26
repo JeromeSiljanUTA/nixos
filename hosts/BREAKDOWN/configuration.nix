@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ../../common/desktop/sway.nix
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
@@ -25,11 +26,6 @@
     description = "Jerome Siljan";
     extraGroups = ["wheel" "video"];
     packages = with pkgs; [];
-  };
-
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
   };
 
   environment.systemPackages = with pkgs; [

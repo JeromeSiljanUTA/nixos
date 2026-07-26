@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ../../common/desktop/sway.nix
     ../../common/hardware/android_adb.nix
     ../../common/hardware/scanner.nix
   ];
@@ -27,11 +28,6 @@
     description = "Jerome Siljan";
     extraGroups = ["wheel" "video"];
     packages = with pkgs; [];
-  };
-
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
   };
 
   environment.systemPackages = with pkgs; [
