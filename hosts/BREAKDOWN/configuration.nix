@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common/desktop/sway.nix
+    ../../common/utils/utils.nix
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
@@ -29,10 +30,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    tree
-    git
-    neovim
-    foot
     firefox
     brightnessctl
   ];
