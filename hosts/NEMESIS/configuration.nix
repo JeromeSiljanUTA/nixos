@@ -8,6 +8,7 @@
 
   imports = [
     ./hardware-configuration.nix
+    ../../common/utils/utils.nix
   ];
   boot.loader.systemd-boot.enable = false;
   boot.loader.grub.enable = true;
@@ -70,30 +71,6 @@
   services.netbird.enable = true;
 
   nixpkgs.config.allowUnfree = true;
-
-  environment.systemPackages = with pkgs; [
-    alejandra
-    btrfs-progs
-    coreutils
-    cryptsetup
-    docker
-    emacs
-    ffmpeg
-    gcc
-    git
-    parted
-    pciutils
-    python3
-    sshfs
-    unixtools.top
-    unzip
-    uv
-    wget
-    zip
-
-    neovim
-    fzf
-  ];
 
   system.stateVersion = "24.11";
 }
