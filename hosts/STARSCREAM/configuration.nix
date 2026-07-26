@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ../../common/hardware/android_adb.nix
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
