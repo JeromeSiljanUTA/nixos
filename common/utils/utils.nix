@@ -9,5 +9,10 @@
       tree
       git
       neovim
+      fzf
+
+      # formatters
+      alejandra
+      stylua
     ];
 }

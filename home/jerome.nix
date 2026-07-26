@@ -134,19 +134,6 @@
   };
 
   home.packages = with pkgs; [
-    # wayland
-    wofi
-    grim
-    slurp
-    wdisplays
-    pwvucontrol
-
-    # formatters
-    alejandra
-    stylua
-
     ibm-plex
-
-    fzf
   ];
 }
