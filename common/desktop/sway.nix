@@ -10,9 +10,11 @@
       grim
       pwvucontrol
       slurp
+      swaybg
       wdisplays
       wofi
     ];
+
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;

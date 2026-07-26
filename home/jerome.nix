@@ -57,6 +57,9 @@
       };
 
       output = {
+        "*" = {
+          bg = "${./wallpapers/Toronto-KingSt-Datacenter-1.jpg} fill";
+        };
         DP-3 = {
           scale = "1";
         };
@@ -98,6 +101,20 @@
     temperature = {
       night = 3000;
     };
+  };
+
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = false;
+
+    desktop = "$HOME/desktop";
+    documents = "$HOME/documents";
+    download = "$HOME/downloads";
+    music = "$HOME/music";
+    pictures = "$HOME/pictures";
+    publicShare = "$HOME/public";
+    templates = "$HOME/templates";
+    videos = "$HOME/videos";
   };
 
   programs.foot = {
