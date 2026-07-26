@@ -31,7 +31,7 @@ require("lazy").setup({
 			"neovim/nvim-lspconfig",
 		},
 		{
-			"junegunn/fzf.vim",
+			"junegunn/fzf",
 			build = "./install --bin",
 		},
 		{
@@ -127,6 +127,8 @@ vim.opt.smartindent = true
 
 vim.opt.shell = "bash"
 vim.opt.shellcmdflag = "-i -c"
+
+vim.g.fzf_buffers_options = "--bind change:first"
 
 vim.api.nvim_set_keymap("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<leader>b", ":Buffers<CR>", { noremap = true, silent = true })
