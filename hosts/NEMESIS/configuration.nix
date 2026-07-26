@@ -38,7 +38,6 @@
     home = "/home/jerome";
   };
 
-  services.netbird.enable = true;
   virtualisation.docker = {
     enable = true;
     daemon.settings = {
