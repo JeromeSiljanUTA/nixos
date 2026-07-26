@@ -23,7 +23,7 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome Siljan";
-    extraGroups = ["wheel" "scanner" "lp" "video"];
+    extraGroups = ["wheel" "video"];
     packages = with pkgs; [];
   };
 
@@ -39,14 +39,7 @@
     foot
     firefox
     brightnessctl
-
-    # scanner
-    sane-backends
-    simple-scan
   ];
-
-  # scanner
-  hardware.sane.enable = true;
 
   services.openssh.enable = true;
   services.netbird.enable = true;

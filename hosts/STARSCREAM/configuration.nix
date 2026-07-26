@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common/hardware/android_adb.nix
+    ../../common/hardware/scanner.nix
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
@@ -24,7 +25,7 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome Siljan";
-    extraGroups = ["wheel" "scanner" "lp" "video"];
+    extraGroups = ["wheel" "video"];
     packages = with pkgs; [];
   };
 
@@ -40,14 +41,7 @@
     foot
     firefox
     brightnessctl
-
-    # scanner
-    sane-backends
-    simple-scan
   ];
-
-  # scanner
-  hardware.sane.enable = true;
 
   services.openssh.enable = true;
   services.netbird.enable = true;
