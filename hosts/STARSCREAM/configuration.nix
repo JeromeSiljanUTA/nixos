@@ -11,6 +11,10 @@
     ../../common/hardware/scanner.nix
     ../../common/utils/utils.nix
   ];
+  programs.nix-ld.enable = true;
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d00e", MODE="0666"
+  '';
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
@@ -32,7 +36,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    firefox
     brightnessctl
   ];
 
@@ -43,7 +46,17 @@
 
   hardware.graphics = {
     enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+    ];
   };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = false;
+  };
+
+  services.blueman.enable = true;
 
   networking.firewall.allowedTCPPorts = [8912];
 

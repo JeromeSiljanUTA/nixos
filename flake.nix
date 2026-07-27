@@ -8,17 +8,28 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
+    nur,
   }: {
     nixosConfigurations.BREAKDOWN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
 
       modules = [
+        ({...}: {
+          nixpkgs.overlays = [
+            nur.overlays.default
+          ];
+        })
         ./hosts/BREAKDOWN/configuration.nix
 
         home-manager.nixosModules.home-manager
@@ -37,6 +48,11 @@
       system = "x86_64-linux";
 
       modules = [
+        ({...}: {
+          nixpkgs.overlays = [
+            nur.overlays.default
+          ];
+        })
         ./hosts/STARSCREAM/configuration.nix
 
         home-manager.nixosModules.home-manager
@@ -45,14 +61,23 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
 
-          home-manager.users.jerome =
-            import ./home/jerome.nix;
+          home-manager.users.jerome = {
+            imports = [
+              ./home/jerome.nix
+              ./home/hosts/STARSCREAM.nix
+            ];
+          };
         }
       ];
     };
 
     nixosConfigurations.MEGATRON = nixpkgs.lib.nixosSystem {
       modules = [
+        ({...}: {
+          nixpkgs.overlays = [
+            nur.overlays.default
+          ];
+        })
         ./hosts/MEGATRON/configuration.nix
 
         home-manager.nixosModules.home-manager
@@ -69,6 +94,11 @@
 
     nixosConfigurations.NEMESIS = nixpkgs.lib.nixosSystem {
       modules = [
+        ({...}: {
+          nixpkgs.overlays = [
+            nur.overlays.default
+          ];
+        })
         ./hosts/NEMESIS/configuration.nix
 
         home-manager.nixosModules.home-manager
