@@ -54,7 +54,10 @@
           bg = "${./wallpapers/Toronto-KingSt-Datacenter-1.jpg} fill";
         };
         DP-3 = {
-          scale = "1";
+          scale = "1.2";
+        };
+        DP-6 = {
+          scale = "1.2";
         };
         eDP-1 = {
           scale = "1";
