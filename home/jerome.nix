@@ -6,6 +6,7 @@
   imports = [
     ./common/firefox.nix
     ./common/foot.nix
+    ./common/gammastep.nix
     ./common/git.nix
     ./common/sway.nix
     ./hosts/STARSCREAM.nix
