@@ -41,7 +41,20 @@
       internalInterfaces = ["enp2s0"];
     };
 
-    firewall.enable = true;
+    networking = {
+      firewall = {
+        enable = true;
+
+        allowedUDPPorts = [
+          67
+          68
+        ];
+
+        trustedInterfaces = [
+          "enp2s0"
+        ];
+      };
+    };
   };
 
   services.dnsmasq = {
