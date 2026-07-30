@@ -64,8 +64,15 @@
 
       no-hosts = true;
 
+      dhcp-host = [
+        # Assign ip for NEMESIS based on MAC of NIC
+        "a0:36:bc:05:50:4f,192.168.10.10,nemesis"
+      ];
+
       address = [
         "/mirage/192.168.10.1"
+        "/mirage.home.arpa/192.168.10.1"
+        "/nemesis.home.arpa/192.168.10.10"
       ];
 
       dhcp-option = [
