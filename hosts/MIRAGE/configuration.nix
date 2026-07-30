@@ -17,6 +17,7 @@
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
+    "net.ipv6.conf.all.forwarding" = 0;
   };
 
   # enp1s0 is the built in realtek NIC (in)
@@ -43,9 +44,7 @@
     };
 
     firewall = {
-      enable = true;
-
-      logRefusedConnections = true;
+      enable = false;
     };
 
     nftables = {
