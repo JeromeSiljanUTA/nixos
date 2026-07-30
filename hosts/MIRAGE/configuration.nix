@@ -41,18 +41,18 @@
       internalInterfaces = ["enp2s0"];
     };
 
-      firewall = {
-        enable = true;
+    firewall = {
+      enable = true;
 
-        allowedUDPPorts = [
-          67
-          68
-        ];
+      allowedUDPPorts = [
+        67
+        68
+      ];
 
-        trustedInterfaces = [
-          "enp2s0"
-        ];
-      };
+      trustedInterfaces = [
+        "enp2s0"
+      ];
+    };
   };
 
   services.dnsmasq = {
@@ -61,6 +61,12 @@
     settings = {
       interface = "enp2s0";
       dhcp-range = "192.168.10.100,192.168.10.200,12h";
+
+      no-hosts = true;
+
+      address = [
+        "/mirage/192.168.10.1"
+      ];
 
       dhcp-option = [
         "option:router,192.168.10.1"
