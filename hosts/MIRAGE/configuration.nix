@@ -41,7 +41,6 @@
       internalInterfaces = ["enp2s0"];
     };
 
-    networking = {
       firewall = {
         enable = true;
 
@@ -54,7 +53,6 @@
           "enp2s0"
         ];
       };
-    };
   };
 
   services.dnsmasq = {
