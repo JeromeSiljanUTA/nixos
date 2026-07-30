@@ -83,7 +83,24 @@
       "inputs": {
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
-        "nur": "nur"
+        "nur": "nur",
+        "stevenblack-hosts": "stevenblack-hosts"
+      }
+    },
+    "stevenblack-hosts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785200132,
+        "narHash": "sha256-TzFQ0aOcIgdNHD7pmrMkdcv+V9ZNzqXnSOm4wBaLtwI=",
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "rev": "56641ec920b3dda4a62901b7cdd4d6f4cca86ed9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "type": "github"
       }
     }
   },

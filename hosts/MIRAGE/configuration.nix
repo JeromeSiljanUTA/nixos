@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  stevenblack-hosts,
   ...
 }: {
   imports = [
@@ -18,8 +19,8 @@
     "net.ipv4.ip_forward" = 1;
   };
 
-  # enp1s0 is the built in realtek NIC
-  # enp2s0 is the m.2 intel NIC
+  # enp1s0 is the built in realtek NIC (in)
+  # enp2s0 is the m.2 intel NIC (out)
 
   networking = {
     hostName = "MIRAGE";
@@ -44,14 +45,53 @@
     firewall = {
       enable = true;
 
-      allowedUDPPorts = [
-        67
-        68
-      ];
+      logRefusedConnections = true;
+    };
 
-      trustedInterfaces = [
-        "enp2s0"
-      ];
+    nftables = {
+      enable = true;
+
+      ruleset = ''
+        table inet filter {
+          chain input {
+            type filter hook input priority filter;
+            policy drop;
+
+            # Allow loopback
+            iifname "lo" accept
+
+            # Allow existing connections
+            ct state established,related accept
+
+            # Allow ping from LAN
+            iifname "enp2s0" ip protocol icmp accept
+
+            # LAN access to router services
+            iifname "enp2s0" tcp dport 22 accept
+            iifname "enp2s0" udp dport 53 accept
+            iifname "enp2s0" tcp dport 53 accept
+
+            # DHCP
+            iifname "enp2s0" udp dport 67 accept
+            iifname "enp2s0" udp dport 68 accept
+
+            log prefix "nft-input-drop: "
+          }
+
+          chain forward {
+            type filter hook forward priority filter;
+            policy drop;
+
+            # Allow responses from websites I hit
+            ct state established,related accept
+
+            # Allow if the packet is coming from LAN and going to WAN
+            iifname "enp2s0" oifname "enp1s0" accept
+
+            log prefix "nft-forward-drop: "
+          }
+        }
+      '';
     };
   };
 
@@ -65,20 +105,28 @@
       no-hosts = true;
 
       dhcp-host = [
-        # Assign ip for NEMESIS based on MAC of NIC
+        # Assign ip for devices based on MAC
         "a0:36:bc:05:50:4f,192.168.10.10,nemesis"
-      ];
-
-      address = [
-        "/mirage/192.168.10.1"
-        "/mirage.home.arpa/192.168.10.1"
-        "/nemesis.home.arpa/192.168.10.10"
+        "34:19:4d:29:c0:b8,192.168.10.30,lg-tv"
       ];
 
       dhcp-option = [
         "option:router,192.168.10.1"
         "option:dns-server,192.168.10.1"
       ];
+
+      host-record = [
+        "mirage,mirage.home.arpa,192.168.10.1"
+        "nemesis,nemesis.home.arpa,192.168.10.10"
+      ];
+
+      addn-hosts = [
+        "${stevenblack-hosts}/hosts"
+        "${./modules/dns_blocklist.txt}"
+      ];
+
+      log-queries = "extra";
+      log-facility = "/var/log/dnsmasq.log";
 
       server = [
         "1.1.1.1"
@@ -99,6 +147,8 @@
   };
 
   environment.systemPackages = with pkgs; [
+    dig
+    tcpdump
   ];
 
   services.openssh.enable = true;

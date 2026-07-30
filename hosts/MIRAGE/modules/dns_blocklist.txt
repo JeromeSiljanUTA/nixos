@@ -1,0 +1,14 @@
+0.0.0.0 ad.doubleclick.net
+:: ad.doubleclick.net
+
+0.0.0.0 googleads.g.doubleclick.net
+:: googleads.g.doubleclick.net
+
+0.0.0.0 pubads.g.doubleclick.net
+:: pubads.g.doubleclick.net
+
+0.0.0.0 pagead2.googlesyndication.com
+:: pagead2.googlesyndication.com
+
+0.0.0.0 ade.googlesyndication.com
+:: ade.googlesyndication.com

@@ -13,6 +13,12 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Ad Blocking
+    stevenblack-hosts = {
+      url = "github:StevenBlack/hosts";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -20,6 +26,7 @@
     nixpkgs,
     home-manager,
     nur,
+    stevenblack-hosts,
   }: {
     nixosConfigurations.BREAKDOWN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
@@ -114,6 +121,10 @@
     };
 
     nixosConfigurations.MIRAGE = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit stevenblack-hosts;
+      };
+
       modules = [
         ({...}: {
           nixpkgs.overlays = [
