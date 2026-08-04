@@ -21,7 +21,7 @@
   networking.hostName = "NEMESIS";
   networking.firewall.checkReversePath = false;
 
-  networking.firewall.allowedTCPPorts = [22 2222 3000 5000 8000 8001 8002 8084 8096 8123 9091 29170];
+  networking.firewall.allowedTCPPorts = [22 80 81 2222 3000 5000 8000 8001 8002 8084 8096 8123 9091 29170];
   networking.firewall.allowPing = true;
 
   networking.firewall.extraCommands = ''
@@ -64,6 +64,108 @@
   };
 
   hardware.nvidia-container-toolkit.enable = true;
+
+  services.nginx = {
+    enable = true;
+
+    virtualHosts."nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:81";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."jellyfin.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8096";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."git.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:3001";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."redlib.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8001";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."lubelogger.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8084";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."homeassistant.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8123";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."immich.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:2283";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."paperless.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8000";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."transmission.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:9091";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."tandoor.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:29170";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."traccar.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8002";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."sftpgo.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8080";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."audiobookshelf.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:13378";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."vector-prime.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8912";
+        proxyWebsockets = true;
+      };
+    };
+  };
 
   services.xserver.xkb.layout = "us";
 
