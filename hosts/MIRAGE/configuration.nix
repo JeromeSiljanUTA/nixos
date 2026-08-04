@@ -119,6 +119,10 @@
         "nemesis,nemesis.home.arpa,192.168.10.10"
       ];
 
+      address = [
+        "/nemesis.home.arpa/192.168.10.10"
+      ];
+
       addn-hosts = [
         "${stevenblack-hosts}/hosts"
         "${./modules/dns_blocklist.txt}"
