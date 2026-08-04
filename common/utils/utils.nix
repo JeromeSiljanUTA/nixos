@@ -11,6 +11,7 @@
       neovim
       fzf
       ffmpeg
+      cmake
 
       # system
       cryptsetup
