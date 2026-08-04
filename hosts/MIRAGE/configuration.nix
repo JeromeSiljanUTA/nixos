@@ -112,6 +112,7 @@
       dhcp-option = [
         "option:router,192.168.10.1"
         "option:dns-server,192.168.10.1"
+        "option:domain-search,home.arpa"
       ];
 
       host-record = [
