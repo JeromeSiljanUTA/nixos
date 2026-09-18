@@ -43,7 +43,7 @@
     enable = true;
   };
 
-  networking.firewall.allowedTCPPorts = [8912];
+  networking.firewall.allowedTCPPorts = [8912 8913];
 
   system.stateVersion = "25.11";
 }
