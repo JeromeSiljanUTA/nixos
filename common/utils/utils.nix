@@ -12,6 +12,7 @@
       fzf
       ffmpeg
       cmake
+      gnumake
 
       # system
       cryptsetup
