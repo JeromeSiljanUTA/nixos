@@ -28,7 +28,7 @@
     iptables -I DOCKER-USER -i docker0 -o wt0 -j DROP
   '';
 
-  networking.nameservers = ["8.8.8.8" "8.8.4.4"];
+  networking.nameservers = ["192.168.10.1" "8.8.8.8" "8.8.4.4"];
 
   time.timeZone = "America/Chicago";
 
@@ -42,7 +42,7 @@
   virtualisation.docker = {
     enable = true;
     daemon.settings = {
-      dns = ["8.8.8.8" "8.8.4.4"];
+      dns = ["192.168.10.1" "8.8.8.8" "8.8.4.4"];
     };
   };
 
