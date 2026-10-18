@@ -124,9 +124,11 @@ in {
     description = "Woodpecker Agent (local backend)";
     wantedBy = ["multi-user.target"];
     # Unit-level ordering/deps (these belong in [Unit], not [Service]).
-    after = ["network-online.target" "woodpecker-server.service" "sops-install-secrets.service"];
+    # Rendered sops templates are written by systemd-tmpfiles-resetup;
+    # secrets are otherwise installed during activation. There is NO
+    # sops-install-secrets.service unit on this system.
+    after = ["network-online.target" "woodpecker-server.service" "systemd-tmpfiles-resetup.service"];
     wants = ["network-online.target" "woodpecker-server.service"];
-    requires = ["sops-install-secrets.service"];
     environment = {
       # Agent dials the server's gRPC port, not the HTTP UI port.
       WOODPECKER_SERVER = serverGrpcAddr;
