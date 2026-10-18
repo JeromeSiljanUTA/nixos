@@ -20,10 +20,12 @@
   ciUser = "woodpecker";
   serverAddr = "127.0.0.1:8003";
 
-  # sops renders these as files; templates copy them into env files.
-  agentSecret = config.sops.secrets.woodpecker_agent_secret.path;
-  giteaClient = config.sops.secrets.woodpecker_gitea_client_id.path;
-  giteaSecret = config.sops.secrets.woodpecker_gitea_client_secret.path;
+  # sops.placeholder.<name> expands to the secret's VALUE (not its path).
+  # Using .path here would write the literal path into the env file, which is
+  # why the server sent an invalid Gitea client id and the agent failed to auth.
+  agentSecret = config.sops.placeholder.woodpecker_agent_secret;
+  giteaClient = config.sops.placeholder.woodpecker_gitea_client_id;
+  giteaSecret = config.sops.placeholder.woodpecker_gitea_client_secret;
 
   # Stable wrapper in a fixed path. Paths under /nix/store or /run/current-system
   # are resolved by the kernel before sudo matching, so pinning them in sudoers
@@ -31,6 +33,11 @@
   # hardcodes the actual rebuild invocation. The CI pipeline calls the wrapper.
   rebuildWrapper = pkgs.writeShellScript "woodpecker-nixos-rebuild" ''
     set -eu
+    # Nix refuses git/plain dirs it doesn't own; mark the checkout safe.
+    export HOME=/var/lib/woodpecker
+    export GIT_CONFIG_COUNT=1
+    export GIT_CONFIG_KEY_0=safe.directory
+    export GIT_CONFIG_VALUE_0='*'
     # Rebuild from the flake at the CURRENT working directory (the CI checkout).
     # sudo preserves cwd, so `$PWD` is the agent's workspace.
     flake="$PWD#NEMESIS"
