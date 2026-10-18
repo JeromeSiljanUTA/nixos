@@ -10,8 +10,7 @@ steps:
   rebuild:
     # Local backend ignores the image, but the schema requires one.
     image: bash
-    # Root-owned wrapper; sudoers permits only this exact command.
-    # `sudo` is provided on the agent's PATH by the NixOS module.
-    # The wrapper rebuilds from the flake in the current checkout dir.
+    # Use the setuid sudo wrapper (store sudo cannot be setuid).
+    # sudoers permits this user to run ONLY /run/woodpecker/rebuild.
     commands:
-      - sudo /run/woodpecker/rebuild
+      - /run/wrappers/bin/sudo /run/woodpecker/rebuild

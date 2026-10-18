@@ -34,6 +34,11 @@
   # are resolved by the kernel before sudo matching, so pinning them in sudoers
   # is fragile. Instead, sudoers permits ONLY this root-owned wrapper, which
   # hardcodes the actual rebuild invocation. The CI pipeline calls the wrapper.
+  # The rebuild restarts woodpecker-agent, which would kill this step if run
+  # in-process. Run it as a detached transient unit in its own cgroup, then
+  # poll its result so the pipeline reports success/failure accurately.
+  systemctl = "${config.systemd.package}/bin/systemctl";
+  journalctl = "${config.systemd.package}/bin/journalctl";
   rebuildWrapper = pkgs.writeShellScript "woodpecker-nixos-rebuild" ''
     set -eu
     # Nix refuses git/plain dirs it doesn't own; mark the checkout safe.
@@ -42,9 +47,26 @@
     export GIT_CONFIG_KEY_0=safe.directory
     export GIT_CONFIG_VALUE_0='*'
     # Rebuild from the flake at the CURRENT working directory (the CI checkout).
-    # sudo preserves cwd, so `$PWD` is the agent's workspace.
     flake="$PWD#NEMESIS"
-    exec ${config.system.path}/bin/nixos-rebuild switch --flake "$flake"
+    unit="ci-nixos-rebuild-$RANDOM$$"
+
+    ${config.systemd.package}/bin/systemd-run \
+      --unit="$unit" --collect --no-block \
+      --setenv=HOME=/var/lib/woodpecker \
+      --setenv=GIT_CONFIG_COUNT=1 \
+      --setenv=GIT_CONFIG_KEY_0=safe.directory \
+      --setenv=GIT_CONFIG_VALUE_0='*' \
+      ${config.system.path}/bin/nixos-rebuild switch --flake "$flake"
+
+    # Poll until the unit is no longer active, then report its result.
+    while ${systemctl} is-active --quiet "$unit"; do
+      sleep 5
+    done
+    if ${systemctl} is-failed --quiet "$unit"; then
+      ${journalctl} -u "$unit" -n 50 --no-pager >&2
+      exit 1
+    fi
+    echo "rebuild unit $unit finished successfully"
   '';
   rebuildWrapperPath = "/run/woodpecker/rebuild";
 in {
@@ -130,13 +152,16 @@ in {
     after = ["network-online.target" "woodpecker-server.service" "systemd-tmpfiles-resetup.service"];
     wants = ["network-online.target" "woodpecker-server.service"];
     # The local backend shells out to these; they must be on PATH.
+    # Note: sudo must be the setuid wrapper, NOT pkgs.sudo (store binaries
+    # cannot be setuid). This is why pkgs.sudo is intentionally absent here.
     path = [
+      # systemd appends /bin and /sbin to each entry, so point at the prefix.
+      "/run/wrappers"
       pkgs.bash
       pkgs.coreutils
       pkgs.git
       pkgs.git-lfs
       pkgs.woodpecker-plugin-git
-      pkgs.sudo
     ];
     environment = {
       # Agent dials the server's gRPC port, not the HTTP UI port.
