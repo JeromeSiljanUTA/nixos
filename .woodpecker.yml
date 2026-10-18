@@ -8,6 +8,8 @@ when:
 
 steps:
   rebuild:
+    # Local backend ignores the image, but the schema requires one.
+    image: bash
     # Root-owned wrapper; sudoers permits only this exact command.
     # The wrapper rebuilds from the flake in the current checkout dir.
     commands:
