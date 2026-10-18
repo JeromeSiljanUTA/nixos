@@ -18,7 +18,10 @@
   ...
 }: let
   ciUser = "woodpecker";
-  serverAddr = "127.0.0.1:8003";
+  # HTTP UI port (behind nginx) and the separate gRPC port the agent dials.
+  serverHttpAddr = "127.0.0.1:8003";
+  serverGrpcAddr = "127.0.0.1:9000";
+  agentHealthAddr = "127.0.0.1:8004";
 
   # sops.placeholder.<name> expands to the secret's VALUE (not its path).
   # Using .path here would write the literal path into the env file, which is
@@ -108,7 +111,9 @@ in {
       WOODPECKER_OPEN = "true";
       WOODPECKER_ADMIN = "jerome";
       WOODPECKER_HOST = "http://ci.nemesis.home.arpa";
-      WOODPECKER_SERVER_ADDR = serverAddr;
+      WOODPECKER_SERVER_ADDR = serverHttpAddr;
+      # Agents speak gRPC to the server on this address.
+      WOODPECKER_GRPC_ADDR = serverGrpcAddr;
       WOODPECKER_GITEA = "true";
       WOODPECKER_GITEA_URL = "http://git.nemesis.home.arpa";
     };
@@ -118,12 +123,17 @@ in {
   systemd.services.woodpecker-agent = {
     description = "Woodpecker Agent (local backend)";
     wantedBy = ["multi-user.target"];
-    after = ["network-online.target" "woodpecker-server.service"];
+    # Unit-level ordering/deps (these belong in [Unit], not [Service]).
+    after = ["network-online.target" "woodpecker-server.service" "sops-install-secrets.service"];
     wants = ["network-online.target" "woodpecker-server.service"];
+    requires = ["sops-install-secrets.service"];
     environment = {
-      WOODPECKER_SERVER = serverAddr;
+      # Agent dials the server's gRPC port, not the HTTP UI port.
+      WOODPECKER_SERVER = serverGrpcAddr;
       WOODPECKER_BACKEND = "local";
       WOODPECKER_MAX_WORKFLOWS = "1";
+      # Avoid colliding with Gitea on :3000.
+      WOODPECKER_HEALTHCHECK_ADDR = agentHealthAddr;
     };
     serviceConfig = {
       User = ciUser;
@@ -132,9 +142,6 @@ in {
       ExecStart = "${pkgs.woodpecker-agent}/bin/woodpecker-agent";
       Restart = "on-failure";
       RestartSec = 15;
-      # Wait for sops to render the env templates first.
-      Requires = ["sops-install-secrets.service"];
-      After = ["sops-install-secrets.service"];
       # Deliberately NOT heavily sandboxed: needs to run nixos-rebuild.
       # NoNewPrivileges must stay false so sudo-compatible, but sudo itself
       # is scoped above. Note sops env file is root-only; readable via
@@ -145,7 +152,7 @@ in {
   # --- reverse proxy -------------------------------------------------------
   services.nginx.virtualHosts."ci.nemesis.home.arpa" = {
     locations."/" = {
-      proxyPass = "http://${serverAddr}";
+      proxyPass = "http://${serverHttpAddr}";
       proxyWebsockets = true;
       extraConfig = ''
         client_max_body_size 1G;
