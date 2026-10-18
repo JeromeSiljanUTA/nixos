@@ -166,6 +166,20 @@
       };
     };
 
+    virtualHosts."searxng.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8888";
+        proxyWebsockets = true;
+      };
+    };
+
+    virtualHosts."firecrawl.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:3002";
+        proxyWebsockets = true;
+      };
+    };
+
     virtualHosts."vector-prime.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8912";
