@@ -129,6 +129,14 @@ in {
     # sops-install-secrets.service unit on this system.
     after = ["network-online.target" "woodpecker-server.service" "systemd-tmpfiles-resetup.service"];
     wants = ["network-online.target" "woodpecker-server.service"];
+    # The local backend shells out to these; they must be on PATH.
+    path = [
+      pkgs.bash
+      pkgs.coreutils
+      pkgs.git
+      pkgs.git-lfs
+      pkgs.woodpecker-plugin-git
+    ];
     environment = {
       # Agent dials the server's gRPC port, not the HTTP UI port.
       WOODPECKER_SERVER = serverGrpcAddr;
