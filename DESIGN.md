@@ -43,28 +43,6 @@ systemd unit running `woodpecker-agent` (local backend) as the stable
   `woodpecker_webhook_secret`, `woodpecker_gitea_token`.
 - Values are shipped to services via `sops.templates` (secret file → env file).
 
-### One-time nemesis setup
-```sh
-sudo mkdir -p /var/lib/sops-nix
-sudo nix shell nixpkgs#age -c age-keygen -o /var/lib/sops-nix/age-key.txt
-grep 'public key' /var/lib/sops-nix/age-key.txt   # add to .sops.yaml as &nemesis
-```
-Then uncomment the host key in `.sops.yaml` and
-`sops updatekeys hosts/NEMESIS/secrets.yaml`.
-Until then, edit secrets with the admin key:
-`SOPS_AGE_KEY_FILE=.secrets/admin-age-key.txt sops hosts/NEMESIS/secrets.yaml`.
-
-### Gitea setup (one-time, UI)
-1. Create OAuth2 app: redirect URI `http://ci.nemesis.home.arpa/authorize`;
-   put client id/secret into the sops secrets.
-2. Create a repo-scope token for `jerome`; put into `woodpecker_gitea_token`.
-3. Put any webhook secret into `woodpecker_webhook_secret`.
-4. In Woodpecker UI, log in via Gitea (first login = admin), enable
-   `jerome/nixos`; it registers the webhook automatically.
-
-**Woodpecker admin:** first Gitea login (`jerome`) becomes admin
-(`WOODPECKER_ADMIN=jerome`).
-
 ## DNS / networking
 
 - dnsmasq on MIRAGE serves `home.arpa`; DHCP hands out mirage as resolver.
@@ -74,8 +52,3 @@ Until then, edit secrets with the admin key:
 - **Known gap:** `home.arpa` does not resolve over netbird from other networks.
   Fix belongs in netbird's DNS config (dashboard, not flake) + serving DNS on `wt0`.
   Tracked as a follow-up; not part of CI work.
-
-## TODO / follow-ups
-- netbird DNS: nameserver + search domain for `home.arpa` over `wt0`.
-- Migrate MEGATRON docs if it stays.
-- Decide whether to keep secrets in sops-nix long-term (currently the only secrets).
