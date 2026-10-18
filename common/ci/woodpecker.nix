@@ -136,6 +136,7 @@ in {
       pkgs.git
       pkgs.git-lfs
       pkgs.woodpecker-plugin-git
+      pkgs.sudo
     ];
     environment = {
       # Agent dials the server's gRPC port, not the HTTP UI port.
