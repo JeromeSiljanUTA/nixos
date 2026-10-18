@@ -22,7 +22,7 @@
   networking.hostName = "NEMESIS";
   networking.firewall.checkReversePath = false;
 
-  networking.firewall.allowedTCPPorts = [22 80 81 2222 3000 5000 8000 8001 8002 8084 8096 8123 9091 29170];
+  networking.firewall.allowedTCPPorts = [22 80 81 2222 3000 5000 8000 8001 8002 8003 8084 8096 8123 9091 29170];
   networking.firewall.allowPing = true;
 
   networking.firewall.extraCommands = ''
