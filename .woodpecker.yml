@@ -1,0 +1,13 @@
+# Woodpecker CI pipeline (local backend).
+# On push to master: rebuild NEMESIS directly on the host.
+# Runs as the scoped `woodpecker` user (sudo limited to nixos-rebuild).
+# No `nix flake check` — go straight to switch; fail = fail.
+when:
+  - event: push
+    branch: master
+
+steps:
+  rebuild:
+    # Root-owned wrapper; sudoers permits only this exact command.
+    # The wrapper rebuilds from the flake in the current checkout dir.
+    - sudo /run/woodpecker/rebuild

@@ -9,6 +9,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common/utils/utils.nix
+    ../../common/ci/woodpecker.nix
   ];
   boot.loader.systemd-boot.enable = false;
   boot.loader.grub.enable = true;
@@ -177,6 +178,19 @@
 
   services.openssh.enable = true;
   services.netbird.enable = true;
+
+  # Secrets (sops-nix). Host age key: /var/lib/sops-nix/age-key.txt
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    age.keyFile = "/var/lib/sops-nix/age-key.txt";
+    secrets = {
+      woodpecker_agent_secret = {};
+      woodpecker_gitea_client_id = {};
+      woodpecker_gitea_client_secret = {};
+      woodpecker_webhook_secret = {};
+      woodpecker_gitea_token = {};
+    };
+  };
 
   nixpkgs.config.allowUnfree = true;
 

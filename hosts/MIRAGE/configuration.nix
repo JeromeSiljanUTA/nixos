@@ -121,6 +121,7 @@
       ];
 
       address = [
+        # wildcard: all *.nemesis.home.arpa resolve to nemesis
         "/nemesis.home.arpa/192.168.10.10"
       ];
 

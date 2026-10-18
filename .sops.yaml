@@ -1,0 +1,21 @@
+# sops-nix configuration.
+#
+# Recipients:
+#   - admin age key (this machine / recovery): .secrets/admin-age-key.txt (NOT committed)
+#   - NEMESIS host age key: created once on the host (see DESIGN.md)
+#
+# To add the NEMESIS host key:
+#   1. On nemesis: sudo mkdir -p /var/lib/sops-nix
+#      sudo nix shell nixpkgs#age -c age-keygen -o /var/lib/sops-nix/age-key.txt
+#      grep 'public key' /var/lib/sops-nix/age-key.txt
+#   2. Paste that public key as &nemesis below and uncomment both entries.
+#   3. sops updatekeys hosts/NEMESIS/secrets.yaml
+keys:
+  - &admin age13mutjuxrrrleyg3h8avzpmvqzv3zacz4f78hkrf3v4am9ul299kqumuzre
+  - &nemesis age1jpeecgw73rwyqpd2gm35ng4uzt9p6hlv5v7wya8xf66wqflva3pqk926nd
+creation_rules:
+  - path_regex: hosts/NEMESIS/secrets\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *nemesis

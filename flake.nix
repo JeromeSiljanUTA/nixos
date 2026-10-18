@@ -19,6 +19,11 @@
       url = "github:StevenBlack/hosts";
       flake = false;
     };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -27,6 +32,7 @@
     home-manager,
     nur,
     stevenblack-hosts,
+    sops-nix,
   }: {
     nixosConfigurations.BREAKDOWN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
@@ -107,6 +113,7 @@
           ];
         })
         ./hosts/NEMESIS/configuration.nix
+        sops-nix.nixosModules.sops
 
         home-manager.nixosModules.home-manager
 
