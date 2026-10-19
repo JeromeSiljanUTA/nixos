@@ -10,7 +10,6 @@
     ./hardware-configuration.nix
     ../../common/utils/utils.nix
     ../../common/ci/woodpecker.nix
-    ./monitoring.nix
   ];
   boot.loader.systemd-boot.enable = false;
   boot.loader.grub.enable = true;
@@ -33,6 +32,9 @@
   networking.nameservers = ["192.168.10.1" "8.8.8.8" "8.8.4.4"];
 
   time.timeZone = "America/Chicago";
+
+  # Disk health warnings and SMART logging.
+  services.smartd.enable = true;
 
   users.users.jerome = {
     isNormalUser = true;
@@ -184,13 +186,6 @@
     virtualHosts."vector-prime.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8912";
-        proxyWebsockets = true;
-      };
-    };
-
-    virtualHosts."grafana.nemesis.home.arpa" = {
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:3003";
         proxyWebsockets = true;
       };
     };
