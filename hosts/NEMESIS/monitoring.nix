@@ -36,7 +36,7 @@
     settings = {
       server = {
         http_addr = "127.0.0.1";
-        http_port = 3000;
+        http_port = 3003;
         domain = "grafana.nemesis.home.arpa";
         root_url = "http://grafana.nemesis.home.arpa/";
       };
