@@ -136,7 +136,7 @@ runsh 'ss -lnup 2>/dev/null || netstat -lnup 2>/dev/null || true; echo; ss -lntp
 
 # ---------------------------------------------------------------- firewall
 section "nftables ruleset (with handles)"
-run nft list ruleset -a
+run nft -a list ruleset
 section "nftables counters"
 runsh 'nft list counters 2>/dev/null || true'
 

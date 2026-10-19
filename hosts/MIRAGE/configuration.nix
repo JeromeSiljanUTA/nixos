@@ -269,6 +269,12 @@
     tcpdump
   ];
 
+  # systemd-networkd enables systemd-resolved by default (mkDefault true).
+  # On this router dnsmasq is the resolver, but resolved's stub listener on
+  # 127.0.0.53:53 / 127.0.0.54:53 stops dnsmasq from binding port 53, which
+  # takes down both DNS and DHCP for the LAN. Turn it off.
+  services.resolved.enable = false;
+
   services.openssh.enable = true;
   services.netbird.enable = true;
 
