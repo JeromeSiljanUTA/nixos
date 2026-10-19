@@ -145,9 +145,11 @@
         };
 
         dhcpV6Config = {
-          # Ask for a /56; most ISPs hand out a /56 or /60 and will refuse a
-          # larger request, so the exact size is only a hint.
-          PrefixDelegationHint = "::/56";
+          # AT&T delegates a /60. The hint is only a request; the ISP decides.
+          PrefixDelegationHint = "::/60";
+          # Start the DHCPv6 client even if the ISP sends no Router
+          # Advertisement. Some gateways only hand out a prefix over DHCPv6.
+          WithoutRA = "solicit";
           UseDNS = false;
         };
 
@@ -174,7 +176,12 @@
 
         networkConfig = {
           IPv6AcceptRA = false;
-          IPv6SendRA = true;
+          # KEEP THIS OFF until the WAN actually has a delegated prefix.
+          # Advertising ourselves as an IPv6 router (and DNS server) while we
+          # have no IPv6 upstream black-holes clients, because they prefer a
+          # dead IPv6 path over working IPv4. Flip to true only after
+          # `networkctl status enp1s0` shows a delegated prefix.
+          IPv6SendRA = false;
           DHCPPrefixDelegation = true;
           LinkLocalAddressing = "ipv6";
         };
