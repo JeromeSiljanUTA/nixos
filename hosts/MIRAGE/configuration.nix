@@ -162,26 +162,30 @@
         linkConfig.RequiredForOnline = "routable";
       };
 
-      # LAN: the downstream network. Take a /64 from the delegated prefix,
-      # assign it here, and announce it (plus DNS) to clients via SLAAC.
+      # LAN: the downstream network. The ISP doesn't delegate a prefix, so
+      # the LAN gets a stable RFC 4193 ULA instead. This gives Matter (Wi-Fi
+      # and Thread) a local IPv6 network that doesn't depend on the ISP.
       "20-lan" = {
         matchConfig.Name = "enp2s0";
 
-        # fe80::1 is the stable link-local address we advertise as the DNS
-        # server in router advertisements below.
+        # 192.168.10.1/24 is the IPv4 gateway. fe80::1 is the stable
+        # link-local we advertise as the DNS server. The ULA address is the
+        # router's own address inside the LAN prefix below.
         address = [
           "192.168.10.1/24"
           "fe80::1/64"
+          "fdad:2cc4:4627:0::1/64"
         ];
 
         networkConfig = {
           IPv6AcceptRA = false;
-          # KEEP THIS OFF until the WAN actually has a delegated prefix.
-          # Advertising ourselves as an IPv6 router (and DNS server) while we
-          # have no IPv6 upstream black-holes clients, because they prefer a
-          # dead IPv6 path over working IPv4. Flip to true only after
-          # `networkctl status enp1s0` shows a delegated prefix.
-          IPv6SendRA = false;
+          # Advertise the ULA so Matter has local IPv6. RouterLifetimeSec = 0
+          # below means we do NOT advertise a default route while there is no
+          # IPv6 upstream, so clients never send internet-bound IPv6 into a
+          # black hole (they use IPv4 for the internet).
+          IPv6SendRA = true;
+          # Keep this so a real ISP prefix is picked up and announced if one
+          # ever shows up on the WAN.
           DHCPPrefixDelegation = true;
           LinkLocalAddressing = "ipv6";
         };
@@ -192,7 +196,20 @@
           Announce = true;
         };
 
+        # Stable RFC 4193 ULA for the LAN (random 40-bit global ID).
+        ipv6Prefixes = [
+          {
+            Prefix = "fdad:2cc4:4627:0::/64";
+            AddressAutoconfiguration = true;
+            OnLink = true;
+          }
+        ];
+
         ipv6SendRAConfig = {
+          # Local-only while there is no IPv6 upstream. Once the ISP delegates
+          # a real prefix, set this to 1800 so clients get a v6 default route
+          # and IPv6 internet starts working.
+          RouterLifetimeSec = 0;
           EmitDNS = true;
           DNS = "fe80::1";
           EmitDomains = true;

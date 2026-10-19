@@ -4,8 +4,7 @@
 #
 # Collects network/IPv6 state into a single report so it can be shared for
 # debugging. Safe to re-run; it only reads state and does a short packet
-# capture. Run it on MIRAGE (ideally as root) while the IPv6 config under test
-# is active:
+# capture. Run it on MIRAGE (as root) while the config under test is active:
 #
 #   sudo bash ~/nixos/hosts/MIRAGE/ipv6-diag.sh
 #
@@ -50,6 +49,21 @@ if [ "$(id -u)" -ne 0 ]; then
   section "WARNING"
   printf 'This script was not run as root; some output (journal, tcpdump, nftables) may be missing.\n' >>"$OUT"
 fi
+
+# ---------------------------------------------------------------- quick summary
+section "Quick summary"
+runsh '
+echo "== Global/ULA IPv6 addresses =="
+ip -6 addr show | grep -E "inet6 (fd[0-9a-f]{2}:|2[0-9a-f]{3}:)" || echo "(none)"
+echo
+echo "== IPv6 default routes =="
+ip -6 route show default || true
+echo
+echo "== networkd delegated prefixes (WAN) =="
+networkctl status enp1s0 2>/dev/null | grep -i "prefix" || echo "(none)"
+echo
+echo "== LAN IPv6 prefixes advertised (from RA config) =="
+grep -R "^Prefix=" /etc/systemd/network/ 2>/dev/null || echo "(none)"'
 
 # ---------------------------------------------------------------- links
 section "Interfaces (brief)"
@@ -106,17 +120,22 @@ run networkctl status enp1s0
 section "systemd-networkd status enp2s0 (LAN)"
 run networkctl status enp2s0
 
-section "systemd-networkd JSON"
-runsh 'networkctl status --json=pretty 2>/dev/null || networkctl status --json=short 2>/dev/null || true'
+section "systemd-networkd JSON (short)"
+runsh 'networkctl status --json=short 2>/dev/null || networkctl status --json=pretty 2>/dev/null || true'
 
-section "networkd config files (/etc/systemd/network)"
+section "networkd config files"
 runsh '
-ls -la /etc/systemd/network/
-for f in /etc/systemd/network/*; do
-  [ -f "$f" ] || continue
+for d in /etc/systemd/network /etc/static/systemd/network /run/systemd/network /usr/lib/systemd/network; do
+  [ -d "$d" ] || continue
+  echo "===== $d ====="
+  ls -la "$d"
+  for f in "$d"/*; do
+    [ -f "$f" ] || continue
+    echo
+    echo "----- $f -----"
+    cat "$f"
+  done
   echo
-  echo "----- $f -----"
-  cat "$f"
 done'
 
 section "systemd-networkd journal (this boot)"
@@ -130,15 +149,26 @@ run systemctl status network-online.target --no-pager
 # ---------------------------------------------------------------- dnsmasq
 section "dnsmasq"
 run systemctl status dnsmasq --no-pager
-runsh 'cat /etc/dnsmasq.conf 2>/dev/null || true'
-runsh 'journalctl -u dnsmasq -b --no-pager | tail -n 120'
+runsh '
+pid=$(pgrep -x dnsmasq | head -n1)
+if [ -n "$pid" ]; then
+  echo "== command line =="
+  tr "\0" " " < "/proc/$pid/cmdline"; echo
+  conf=$(tr "\0" "\n" < "/proc/$pid/cmdline" | awk "/^-C$/{getline; print}")
+  if [ -n "$conf" ]; then
+    echo
+    echo "== config file: $conf =="
+    cat "$conf"
+  fi
+else
+  echo "dnsmasq is not running"
+fi'
+runsh 'journalctl -u dnsmasq -b --no-pager | tail -n 80'
 runsh 'ss -lnup 2>/dev/null || netstat -lnup 2>/dev/null || true; echo; ss -lntp 2>/dev/null || netstat -lntp 2>/dev/null || true'
 
 # ---------------------------------------------------------------- firewall
 section "nftables ruleset (with handles)"
 run nft -a list ruleset
-section "nftables counters"
-runsh 'nft list counters 2>/dev/null || true'
 
 # ---------------------------------------------------------------- neighbors
 section "Neighbor tables"
@@ -156,7 +186,7 @@ section "Connectivity tests"
 run ping -4 -c2 -W2 1.1.1.1
 run ping -6 -c2 -W2 2606:4700:4700::1111
 run ping -6 -c2 -W2 fe80::1%enp2s0
-run ping -6 -c2 -W2 2606:4700:4700::1111%enp1s0
+run ping -6 -c2 -W2 fdad:2cc4:4627:0::1%enp2s0
 run dig +time=2 +tries=1 A example.com
 run dig +time=2 +tries=1 AAAA example.com
 run dig +time=2 +tries=1 @2606:4700:4700::1111 AAAA example.com
@@ -166,11 +196,29 @@ runsh 'curl -4 -sS --max-time 8 -o /dev/null -w "IPv4 HTTP %{http_code}\n" https
 runsh 'curl -6 -sS --max-time 8 -o /dev/null -w "IPv6 HTTP %{http_code}\n" https://www.google.com 2>&1 || true'
 
 # ---------------------------------------------------------------- captures
-section "Packet capture: WAN enp1s0 (RA + DHCPv6 + DHCPv4), 25s"
-runsh 'timeout 25 tcpdump -ni enp1s0 -vvv -c 100 "icmp6 or udp port 546 or udp port 547 or udp port 67 or udp port 68" 2>&1 || true'
-
-section "Packet capture: LAN enp2s0 (ICMPv6), 10s"
-runsh 'timeout 10 tcpdump -ni enp2s0 -vvv -c 50 "icmp6" 2>&1 || true'
+# Run both captures in parallel so we only wait ~60s total. Router
+# advertisements can be 30-200s apart, so 60s gives a decent chance of
+# catching both the ISP's and the eero's advertisements.
+section "Packet capture: WAN enp1s0 + LAN enp2s0 (60s, parallel)"
+WANOUT=$(mktemp)
+LANOUT=$(mktemp)
+timeout 60 tcpdump -ni enp1s0 -vvv -c 200 \
+  'icmp6 or udp port 546 or udp port 547 or udp port 67 or udp port 68' >"$WANOUT" 2>&1 &
+p1=$!
+timeout 60 tcpdump -ni enp2s0 -vvv -c 200 'icmp6' >"$LANOUT" 2>&1 &
+p2=$!
+wait "$p1" "$p2" 2>/dev/null || true
+{
+  echo
+  echo '$ timeout 60 tcpdump -ni enp1s0 -vvv "icmp6 or udp port 546 or udp port 547 or udp port 67 or udp port 68"'
+  echo "--- enp1s0 (WAN): look for ISP Router Advertisements and DHCPv6 replies ---"
+  cat "$WANOUT"
+  echo
+  echo '$ timeout 60 tcpdump -ni enp2s0 -vvv "icmp6"'
+  echo "--- enp2s0 (LAN): look for RAs (who advertises, Router Lifetime, prefixes, RDNSS) ---"
+  cat "$LANOUT"
+} >>"$OUT"
+rm -f "$WANOUT" "$LANOUT"
 
 # ---------------------------------------------------------------- done
 section "End of report"
