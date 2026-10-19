@@ -17,7 +17,8 @@
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
-    "net.ipv6.conf.all.forwarding" = 0;
+    # Required for the router to pass IPv6 traffic between LAN and WAN.
+    "net.ipv6.conf.all.forwarding" = 1;
   };
 
   # enp1s0 is the built in realtek NIC (in)
@@ -27,15 +28,9 @@
     hostName = "MIRAGE";
 
     useDHCP = false;
-
-    interfaces.enp1s0.useDHCP = true;
-
-    interfaces.enp2s0.ipv4.addresses = [
-      {
-        address = "192.168.10.1";
-        prefixLength = 24;
-      }
-    ];
+    # systemd-networkd manages the interfaces. It is required for the
+    # DHCPv6 prefix delegation and router advertisements configured below.
+    useNetworkd = true;
 
     nat = {
       enable = true;
@@ -65,6 +60,33 @@
             # Allow ping from LAN
             iifname "enp2s0" ip protocol icmp accept
 
+            # IPv6 from LAN: neighbour discovery + ping
+            iifname "enp2s0" icmpv6 type {
+              echo-request,
+              nd-router-solicit,
+              nd-neighbor-solicit,
+              nd-neighbor-advert
+            } accept
+
+            # IPv6 from WAN: ISP router advertisements and neighbour discovery
+            iifname "enp1s0" icmpv6 type {
+              nd-router-advert,
+              nd-router-solicit,
+              nd-neighbor-solicit,
+              nd-neighbor-advert
+            } accept
+
+            # ICMPv6 errors are required for path MTU discovery to work
+            icmpv6 type {
+              destination-unreachable,
+              packet-too-big,
+              time-exceeded,
+              parameter-problem
+            } accept
+
+            # DHCPv6 client replies from the ISP
+            iifname "enp1s0" udp dport 546 accept
+
             # LAN access to router services
             iifname "enp2s0" tcp dport 22 accept
             iifname "enp2s0" udp dport 53 accept
@@ -87,10 +109,91 @@
             # Allow if the packet is coming from LAN and going to WAN
             iifname "enp2s0" oifname "enp1s0" accept
 
+            # ICMPv6 is required for IPv6 to function (PMTU, neighbour discovery)
+            icmpv6 type {
+              destination-unreachable,
+              packet-too-big,
+              time-exceeded,
+              parameter-problem,
+              nd-neighbor-solicit,
+              nd-neighbor-advert
+            } accept
+
             log prefix "nft-forward-drop: "
           }
         }
       '';
+    };
+  };
+
+  systemd.network = {
+    networks = {
+      # WAN: the ISP uplink. DHCPv4 gives us the internet, DHCPv6 asks for a
+      # delegated prefix (PD) that we carve up for the LAN below.
+      "10-wan" = {
+        matchConfig.Name = "enp1s0";
+
+        networkConfig = {
+          DHCP = "yes";
+          IPv6AcceptRA = true;
+          LinkLocalAddressing = "ipv6";
+        };
+
+        dhcpV4Config = {
+          # We run our own resolver on the router.
+          UseDNS = false;
+        };
+
+        dhcpV6Config = {
+          # Ask for a /56; most ISPs hand out a /56 or /60 and will refuse a
+          # larger request, so the exact size is only a hint.
+          PrefixDelegationHint = "::/56";
+          UseDNS = false;
+        };
+
+        # Some ISPs advertise a prefix without setting the managed flag, so
+        # force the DHCPv6 client to run whenever we receive an RA.
+        ipv6AcceptRAConfig = {
+          DHCPv6Client = "always";
+        };
+
+        linkConfig.RequiredForOnline = "routable";
+      };
+
+      # LAN: the downstream network. Take a /64 from the delegated prefix,
+      # assign it here, and announce it (plus DNS) to clients via SLAAC.
+      "20-lan" = {
+        matchConfig.Name = "enp2s0";
+
+        # fe80::1 is the stable link-local address we advertise as the DNS
+        # server in router advertisements below.
+        address = [
+          "192.168.10.1/24"
+          "fe80::1/64"
+        ];
+
+        networkConfig = {
+          IPv6AcceptRA = false;
+          IPv6SendRA = true;
+          DHCPPrefixDelegation = true;
+          LinkLocalAddressing = "ipv6";
+        };
+
+        dhcpPrefixDelegationConfig = {
+          UplinkInterface = "enp1s0";
+          SubnetId = "1";
+          Announce = true;
+        };
+
+        ipv6SendRAConfig = {
+          EmitDNS = true;
+          DNS = "fe80::1";
+          EmitDomains = true;
+          Domains = "home.arpa";
+        };
+
+        linkConfig.RequiredForOnline = "routable";
+      };
     };
   };
 
@@ -116,7 +219,8 @@
       ];
 
       host-record = [
-        "mirage,mirage.home.arpa,192.168.10.1"
+        # fe80::1 is the router's stable LAN link-local address.
+        "mirage,mirage.home.arpa,192.168.10.1,fe80::1"
         "nemesis,nemesis.home.arpa,192.168.10.10"
       ];
 
@@ -136,6 +240,8 @@
       server = [
         "1.1.1.1"
         "1.0.0.1"
+        "2606:4700:4700::1111"
+        "2606:4700:4700::1001"
       ];
     };
   };
