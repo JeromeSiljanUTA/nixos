@@ -189,6 +189,16 @@
         proxyWebsockets = true;
       };
     };
+
+    virtualHosts."matrix.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8008";
+        proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 10G;
+        '';
+      };
+    };
   };
 
   services.xserver.xkb.layout = "us";
