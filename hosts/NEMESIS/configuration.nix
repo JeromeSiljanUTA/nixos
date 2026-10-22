@@ -124,6 +124,9 @@
       locations."/" = {
         proxyPass = "http://127.0.0.1:2283";
         proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 20G;
+        '';
       };
     };
 
