@@ -69,12 +69,65 @@
     echo "rebuild unit $unit finished successfully"
   '';
   rebuildWrapperPath = "/run/woodpecker/rebuild";
+
+  # Redeploy docker services via the shockwaves-lab Makefile. The Makefile is
+  # the single control plane for container lifecycle (`make restart` does
+  # down + up -d).
+  #
+  # Trust boundary: this wrapper takes NO arguments. It reads the list of
+  # changed services from a fixed, CI-owned file (deployListPath) that the
+  # unprivileged pipeline step writes after syncing the pushed checkout into
+  # deployRepo. sudoers therefore allows exactly `/run/woodpecker/docker-deploy`
+  # with no arguments — the service name never crosses the sudo boundary as a
+  # caller-supplied string. It does NOT get arbitrary docker access; it only
+  # runs `make restart SERVICE=<validated-dir>`.
+  #
+  # The repo must live at /iacon/containers/shockwaves-lab: every compose file
+  # bind-mounts `../../volumes/...`, which resolves to /iacon/containers/volumes
+  # only from this location. Deploying from anywhere else silently points the
+  # mounts at the wrong (or a missing) directory.
+  deployRepo = "/iacon/containers/shockwaves-lab";
+  deployListPath = "/var/lib/woodpecker/deploy-services";
+  makeBin = "${pkgs.gnumake}/bin/make";
+  dockerComposePath = pkgs.writeScript "woodpecker-docker-deploy" ''
+    #!${pkgs.bash}/bin/bash
+    set -eu
+    repo=${lib.escapeShellArg deployRepo}
+    list=${lib.escapeShellArg deployListPath}
+
+    [ -f "$list" ] || { echo "no deploy list at $list" >&2; exit 1; }
+    cd "$repo"
+
+    # Only newline-separated, validated directory names are honoured.
+    while IFS= read -r svc; do
+      [ -n "$svc" ] || continue
+      case "$svc" in
+        *[!A-Za-z0-9._-]*|.*) echo "skipping invalid service: $svc" >&2; continue ;;
+      esac
+      [ -f "$repo/$svc/docker-compose.yml" ] || { echo "no compose for $svc" >&2; exit 1; }
+      echo "==> redeploy $svc"
+      # We are already root here; pass DOCKER so the Makefile does not nest sudo.
+      ${makeBin} restart SERVICE="$svc" DOCKER=${config.virtualisation.docker.package}/bin/docker
+    done < "$list"
+  '';
+  dockerComposeWrapperPath = "/run/woodpecker/docker-deploy";
 in {
-  # Expose the wrapper as a REAL root-owned file (not a symlink) at a fixed
-  # path. sudo canonicalizes symlinks against the store before matching, which
+  # Expose the wrappers as REAL root-owned files (not symlinks) at fixed
+  # paths. sudo canonicalizes symlinks against the store before matching, which
   # would break the sudoers rule; a regular file avoids that.
   systemd.tmpfiles.rules = [
     "C+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
+    "C+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
+    # Deploy checkout: owned by jerome, group-writable by the CI user so the
+    # unprivileged pipeline step can sync the pushed tree into it. The root
+    # wrapper only ever reads Makefile/docker-compose.yml from here.
+    # Lives under /iacon so compose's `../../volumes` mounts resolve correctly.
+    "d /iacon/containers 0755 jerome ${ciUser} -"
+    "d ${deployRepo} 2775 jerome ${ciUser} -"
+    # Service list consumed by the root deploy wrapper. Written by the CI user,
+    # read by root: mode 0664 root:ciUser would be more locked down, but the CI
+    # user must be able to truncate/rewrite it, so keep it CI-owned.
+    "f ${deployListPath} 0664 ${ciUser} ${ciUser} -"
   ];
   # --- scoped rebuild user -------------------------------------------------
   users.users.${ciUser} = {
@@ -92,6 +145,13 @@ in {
         {
           # Only the wrapper; no arbitrary args.
           command = rebuildWrapperPath;
+          options = ["NOPASSWD"];
+        }
+        {
+          # Redeploy via the Makefile. NO arguments: the wrapper reads the
+          # service list from a fixed CI-owned file, so nothing
+          # caller-controlled crosses the sudo boundary.
+          command = dockerComposeWrapperPath;
           options = ["NOPASSWD"];
         }
       ];
@@ -161,6 +221,7 @@ in {
       pkgs.coreutils
       pkgs.git
       pkgs.git-lfs
+      pkgs.rsync
       pkgs.woodpecker-plugin-git
     ];
     environment = {
