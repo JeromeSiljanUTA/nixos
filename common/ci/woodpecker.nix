@@ -212,6 +212,9 @@ in {
       WOODPECKER_MAX_WORKFLOWS = "1";
       # Avoid colliding with Gitea on :3000.
       WOODPECKER_HEALTHCHECK_ADDR = agentHealthAddr;
+      GIT_CONFIG_COUNT = "1";
+      GIT_CONFIG_KEY_0 = "safe.directory";
+      GIT_CONFIG_VALUE_0 = "*";
     };
     serviceConfig = {
       User = ciUser;
