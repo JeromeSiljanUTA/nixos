@@ -71,21 +71,6 @@
   rebuildWrapperPath = "/run/woodpecker/rebuild";
 
   # Redeploy docker services via the shockwaves-lab Makefile. The Makefile is
-  # the single control plane for container lifecycle (`make restart` does
-  # down + up -d).
-  #
-  # Trust boundary: this wrapper takes NO arguments. It reads the list of
-  # changed services from a fixed, CI-owned file (deployListPath) that the
-  # unprivileged pipeline step writes after syncing the pushed checkout into
-  # deployRepo. sudoers therefore allows exactly `/run/woodpecker/docker-deploy`
-  # with no arguments — the service name never crosses the sudo boundary as a
-  # caller-supplied string. It does NOT get arbitrary docker access; it only
-  # runs `make restart SERVICE=<validated-dir>`.
-  #
-  # The repo must live at /iacon/containers/shockwaves-lab: every compose file
-  # bind-mounts `../../volumes/...`, which resolves to /iacon/containers/volumes
-  # only from this location. Deploying from anywhere else silently points the
-  # mounts at the wrong (or a missing) directory.
   deployRepo = "/iacon/containers/shockwaves-lab";
   deployListPath = "/var/lib/woodpecker/deploy-services";
   makeBin = "${pkgs.gnumake}/bin/make";
@@ -96,6 +81,7 @@
     list=${lib.escapeShellArg deployListPath}
 
     [ -f "$list" ] || { echo "no deploy list at $list" >&2; exit 1; }
+    [ -d "$repo/.git" ] || { echo "$repo is not a git clone" >&2; exit 1; }
     cd "$repo"
 
     # Only newline-separated, validated directory names are honoured.
@@ -118,21 +104,16 @@ in {
   systemd.tmpfiles.rules = [
     "C+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
     "C+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
-    # Deploy checkout: owned by jerome, group-writable by the CI user so the
-    # unprivileged pipeline step can sync the pushed tree into it. The root
-    # wrapper only ever reads Makefile/docker-compose.yml from here.
-    # Lives under /iacon so compose's `../../volumes` mounts resolve correctly.
-    "d /iacon/containers 0755 jerome ${ciUser} -"
-    "d ${deployRepo} 2775 jerome ${ciUser} -"
-    # Service list consumed by the root deploy wrapper. Written by the CI user,
-    # read by root: mode 0664 root:ciUser would be more locked down, but the CI
-    # user must be able to truncate/rewrite it, so keep it CI-owned.
-    "f ${deployListPath} 0664 ${ciUser} ${ciUser} -"
+    "d /iacon/containers 2775 jerome shockwaves -"
+    "d ${deployRepo} 2775 jerome shockwaves -"
+    "f ${deployListPath} 0664 ${ciUser} shockwaves -"
   ];
   # --- scoped rebuild user -------------------------------------------------
+  users.groups.shockwaves = {};
   users.users.${ciUser} = {
     isSystemUser = true;
     group = ciUser;
+    extraGroups = ["shockwaves"];
     home = "/var/lib/woodpecker";
     createHome = true;
   };
@@ -175,6 +156,7 @@ in {
   sops.templates."woodpecker-agent.env" = {
     content = ''
       WOODPECKER_AGENT_SECRET=${agentSecret}
+      DEPLOY_GIT_TOKEN=${config.sops.placeholder.woodpecker_gitea_token}
     '';
     owner = ciUser;
     group = ciUser;
@@ -221,7 +203,6 @@ in {
       pkgs.coreutils
       pkgs.git
       pkgs.git-lfs
-      pkgs.rsync
       pkgs.woodpecker-plugin-git
     ];
     environment = {
@@ -235,6 +216,7 @@ in {
     serviceConfig = {
       User = ciUser;
       Group = ciUser;
+      UMask = "0002";
       EnvironmentFile = config.sops.templates."woodpecker-agent.env".path;
       ExecStart = "${pkgs.woodpecker-agent}/bin/woodpecker-agent";
       Restart = "on-failure";

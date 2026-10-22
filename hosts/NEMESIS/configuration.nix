@@ -39,7 +39,7 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome";
-    extraGroups = ["wheel" "jerome"];
+    extraGroups = ["wheel" "jerome" "shockwaves"];
     home = "/home/jerome";
   };
 
