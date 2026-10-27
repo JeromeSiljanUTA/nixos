@@ -105,7 +105,7 @@ in {
     "C+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
     "C+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
     "d /iacon/containers 2775 jerome shockwaves -"
-    "Z ${deployRepo} 2775 jerome shockwaves -"
+    "d ${deployRepo} 2775 jerome shockwaves -"
     "f ${deployListPath} 0664 ${ciUser} shockwaves -"
   ];
   # --- scoped rebuild user -------------------------------------------------

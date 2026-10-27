@@ -202,22 +202,6 @@
         '';
       };
     };
-
-    virtualHosts."fdroid.nemesis.home.arpa" = {
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8090";
-        proxyWebsockets = true;
-      };
-
-      locations."/upload/" = {
-        proxyPass = "http://127.0.0.1:8091/";
-        extraConfig = ''
-          client_max_body_size 2G;
-          proxy_request_buffering off;
-          proxy_read_timeout 300s;
-        '';
-      };
-    };
   };
 
   services.xserver.xkb.layout = "us";
