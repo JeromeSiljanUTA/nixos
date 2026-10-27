@@ -204,9 +204,11 @@
     };
 
     virtualHosts."fdroid.nemesis.home.arpa" = {
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8090";
-        proxyWebsockets = true;
+      locations."/fdroid/repo/" = {
+        proxyPass = "http://127.0.0.1:8090/";
+        extraConfig = ''
+          client_max_body_size 2G;
+        '';
       };
 
       locations."/upload/" = {
@@ -216,6 +218,10 @@
           proxy_request_buffering off;
           proxy_read_timeout 300s;
         '';
+      };
+
+      locations."/" = {
+        return = 302 "http://fdroid.nemesis.home.arpa/fdroid/repo/";
       };
     };
   };
