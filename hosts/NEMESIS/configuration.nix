@@ -221,7 +221,7 @@
       };
 
       locations."/" = {
-        return = 302 "http://fdroid.nemesis.home.arpa/fdroid/repo/";
+        return = "302 http://fdroid.nemesis.home.arpa/fdroid/repo/";
       };
     };
   };
