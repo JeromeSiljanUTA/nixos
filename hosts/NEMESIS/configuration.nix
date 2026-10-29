@@ -33,7 +33,6 @@
 
   time.timeZone = "America/Chicago";
 
-  # Disk health warnings and SMART logging.
   services.smartd.enable = true;
 
   users.users.jerome = {
