@@ -41,6 +41,9 @@
     description = "Jerome";
     extraGroups = ["wheel" "shockwaves"];
     home = "/home/jerome";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGIM3s2S9uetJp24uZjoo9T+XEVCu3l5OVPTjh9EjmET jerome@BREAKDOWN"
+    ];
   };
 
   virtualisation.docker = {
