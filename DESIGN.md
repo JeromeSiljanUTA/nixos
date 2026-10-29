@@ -36,12 +36,32 @@ systemd unit running `woodpecker-agent` (local backend) as the stable
 **Sudo:** `woodpecker` may run only `nixos-rebuild switch --flake *`, NOPASSWD.
 
 **Secrets: sops-nix** (age). Ciphertext is safe to commit publicly.
-- Admin/recovery key: `.secrets/admin-age-key.txt` (gitignored, NOT committed).
-- Host key: `/var/lib/sops-nix/age-key.txt` on nemesis (one-time, see below).
-- Secret names in `hosts/NEMESIS/secrets.yaml`: `woodpecker_agent_secret`,
-  `woodpecker_gitea_client_id`, `woodpecker_gitea_client_secret`,
-  `woodpecker_webhook_secret`, `woodpecker_gitea_token`.
-- Values are shipped to services via `sops.templates` (secret file → env file).
+
+*Layout — one policy, many files:*
+- `.sops.yaml` — policy only, contains NO secrets. Lists age public keys and maps
+  `hosts/<HOST>/secrets.yaml` → allowed recipients. Read only by the `sops` CLI;
+  NixOS never reads it.
+- `hosts/<HOST>/secrets.yaml` — ciphertext for one host, paired with
+  `sops.defaultSopsFile` in that host's `configuration.nix`.
+- `.secrets/admin-age-key.txt` — recovery private key (gitignored, NOT committed).
+- `/var/lib/sops-nix/age-key.txt` — that host's private key, generated on the host
+  and never committed.
+
+*Adding a host (e.g. BREAKDOWN):*
+1. On the host: `sudo nix shell nixpkgs#age -c age-keygen -o /var/lib/sops-nix/age-key.txt`
+   (the private key never leaves the host; only its public key is published).
+2. Add the public key as `&hostname` in `.sops.yaml` and a `creation_rule` for
+   its `secrets.yaml`.
+3. Add `sops-nix.nixosModules.sops` and a `sops { ... }` block to the host.
+4. Create/edit the file with the admin key:
+   `SOPS_AGE_KEY_FILE=.secrets/admin-age-key.txt sops hosts/<HOST>/secrets.yaml`
+   (or `sops updatekeys` after adding a recipient).
+
+*Existing hosts:*
+- NEMESIS secrets: `woodpecker_agent_secret`, `woodpecker_gitea_client_id`,
+  `woodpecker_gitea_client_secret`, `woodpecker_webhook_secret`,
+  `woodpecker_gitea_token` (shipped via `sops.templates`).
+- BREAKDOWN secrets: none yet — sops is wired up and ready for future secrets.
 
 ## DNS / networking
 

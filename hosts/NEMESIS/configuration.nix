@@ -231,7 +231,6 @@
   services.openssh.enable = true;
   services.netbird.enable = true;
 
-  # Secrets (sops-nix). Host age key: /var/lib/sops-nix/age-key.txt
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.keyFile = "/var/lib/sops-nix/age-key.txt";

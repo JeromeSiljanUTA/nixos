@@ -30,6 +30,14 @@ Manual: `sudo nixos-rebuild switch --flake .#HOSTNAME`
 Woodpecker on nemesis rebuilds it on push to `master`. See `DESIGN.md`.
 
 ## Secrets
-sops-nix (age). Host key at `/var/lib/sops-nix/age-key.txt`.
-Edit: `SOPS_AGE_KEY_FILE=.secrets/admin-age-key.txt sops hosts/NEMESIS/secrets.yaml`
-Setup steps: see `DESIGN.md`.
+sops-nix (age). One policy file (`.sops.yaml`) + one ciphertext file per host
+(`hosts/<HOST>/secrets.yaml`). Each host decrypts with its own
+`/var/lib/sops-nix/age-key.txt`; the recovery key is `.secrets/admin-age-key.txt`
+(gitignored).
+
+Edit a host's secrets:
+```sh
+SOPS_AGE_KEY_FILE=.secrets/admin-age-key.txt sops hosts/NEMESIS/secrets.yaml
+```
+
+Adding a host: see the header of `.sops.yaml` and `DESIGN.md`.
