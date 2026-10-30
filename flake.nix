@@ -24,6 +24,11 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    kpmenu = {
+      url = "git+http://git.nemesis.home.arpa/jerome/kpmenu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -33,6 +38,7 @@
     nur,
     stevenblack-hosts,
     sops-nix,
+    kpmenu,
   }: {
     nixosConfigurations.BREAKDOWN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
@@ -84,7 +90,16 @@
             imports = [
               ./home/jerome.nix
               ./home/hosts/STARSCREAM.nix
+              kpmenu.homeManagerModules.default
             ];
+
+            programs.kpmenu = {
+              enable = true;
+              database = "~/keepass/Database.kdbx";
+              keybinding = null;
+              typeKeybinding = null;
+              viewKeybinding = "Mod4+v";
+            };
           };
         }
       ];
