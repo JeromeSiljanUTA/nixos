@@ -52,8 +52,12 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
 
-          home-manager.users.jerome =
-            import ./home/jerome.nix;
+          home-manager.users.jerome = {
+            imports = [
+              ./home/jerome.nix
+              ./home/hosts/BREAKDOWN.nix
+            ];
+          };
         }
       ];
     };

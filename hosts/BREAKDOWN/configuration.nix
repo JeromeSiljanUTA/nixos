@@ -54,7 +54,11 @@
     enable = true;
   };
 
-  networking.firewall.allowedTCPPorts = [8912 8913];
+  # syncthing default ports: 22000/tcp (transfer), 22000/udp (quic), 21027/udp (discovery)
+  networking.firewall = {
+    allowedTCPPorts = [8912 8913 22000];
+    allowedUDPPorts = [21027 22000];
+  };
 
   system.stateVersion = "25.11";
 }
