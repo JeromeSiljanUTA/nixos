@@ -9,7 +9,6 @@
     ./common/gammastep.nix
     ./common/git.nix
     ./common/sway.nix
-    ./hosts/STARSCREAM.nix
   ];
   home.username = "jerome";
   home.homeDirectory = "/home/jerome";

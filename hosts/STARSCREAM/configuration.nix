@@ -42,6 +42,12 @@
   services.openssh.enable = true;
   services.netbird.enable = true;
 
+  # syncthing default ports: 22000/tcp (transfer), 22000/udp (quic), 21027/udp (discovery)
+  networking.firewall = {
+    allowedTCPPorts = [8912 22000];
+    allowedUDPPorts = [21027 22000];
+  };
+
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.keyFile = "/var/lib/sops-nix/age-key.txt";
@@ -75,8 +81,6 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-
-  networking.firewall.allowedTCPPorts = [8912];
 
   system.stateVersion = "25.11";
 }
