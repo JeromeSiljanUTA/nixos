@@ -68,6 +68,7 @@
           ];
         })
         ./hosts/STARSCREAM/configuration.nix
+        sops-nix.nixosModules.sops
 
         home-manager.nixosModules.home-manager
 

@@ -42,6 +42,17 @@
   services.openssh.enable = true;
   services.netbird.enable = true;
 
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    age.keyFile = "/var/lib/sops-nix/age-key.txt";
+    secrets = {
+      gitea_token_laptops = {
+        owner = "jerome";
+        mode = "0400";
+      };
+    };
+  };
+
   security.polkit.enable = true;
 
   hardware.graphics = {

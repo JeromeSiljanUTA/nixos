@@ -4,11 +4,13 @@
 #   &admin      admin / recovery key  -> .secrets/admin-age-key.txt   (NOT committed)
 #   &nemesis    NEMESIS host key      -> /var/lib/sops-nix/age-key.txt on NEMESIS
 #   &breakdown  BREAKDOWN host key    -> /var/lib/sops-nix/age-key.txt on BREAKDOWN
+#   &starscram  STARSCREAM host key   -> /var/lib/sops-nix/age-key.txt on STARSCREAM
 
 keys:
   - &admin age13mutjuxrrrleyg3h8avzpmvqzv3zacz4f78hkrf3v4am9ul299kqumuzre
   - &nemesis age1jpeecgw73rwyqpd2gm35ng4uzt9p6hlv5v7wya8xf66wqflva3pqk926nd
   - &breakdown age1jaggz55asf9t9elmu9ws6zug833edh4w2w9n5kn0gr4c955yeezql8vfwn
+  - &starscram age1lnwle3a6u07v49rs3nmyr2jm8flps6uyayf9tkp0da8tkk59zqfqvn5asm
 
 creation_rules:
   - path_regex: hosts/NEMESIS/secrets\.yaml$
@@ -22,3 +24,9 @@ creation_rules:
       - age:
           - *admin
           - *breakdown
+
+  - path_regex: hosts/STARSCREAM/secrets\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *starscram
