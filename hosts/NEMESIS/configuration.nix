@@ -50,6 +50,7 @@
     enable = true;
     daemon.settings = {
       dns = ["192.168.10.1" "8.8.8.8" "8.8.4.4"];
+      insecure-registries = ["git.nemesis.home.arpa"];
     };
   };
 

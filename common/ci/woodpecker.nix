@@ -93,7 +93,7 @@
       [ -f "$repo/$svc/docker-compose.yml" ] || { echo "no compose for $svc" >&2; exit 1; }
       echo "==> redeploy $svc"
       # We are already root here; pass DOCKER so the Makefile does not nest sudo.
-      ${makeBin} restart SERVICE="$svc" DOCKER=${config.virtualisation.docker.package}/bin/docker
+      ${makeBin} upgrade SERVICE="$svc" DOCKER=${config.virtualisation.docker.package}/bin/docker
     done < "$list"
   '';
   dockerComposeWrapperPath = "/run/woodpecker/docker-deploy";
@@ -204,6 +204,8 @@ in {
       pkgs.git
       pkgs.git-lfs
       pkgs.woodpecker-plugin-git
+      config.nix.package
+      pkgs.crane
     ];
     environment = {
       # Agent dials the server's gRPC port, not the HTTP UI port.
@@ -212,6 +214,7 @@ in {
       WOODPECKER_MAX_WORKFLOWS = "1";
       # Avoid colliding with Gitea on :3000.
       WOODPECKER_HEALTHCHECK_ADDR = agentHealthAddr;
+      HOME = "/var/lib/woodpecker";
       GIT_CONFIG_COUNT = "1";
       GIT_CONFIG_KEY_0 = "safe.directory";
       GIT_CONFIG_VALUE_0 = "*";

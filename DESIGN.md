@@ -35,6 +35,13 @@ systemd unit running `woodpecker-agent` (local backend) as the stable
 
 **Sudo:** `woodpecker` may run only `nixos-rebuild switch --flake *`, NOPASSWD.
 
+**Nix-built service images:** `vector-prime`'s own pipeline builds its images
+with Nix and pushes them to the Gitea container registry with `crane` (the CI
+user has no Docker socket). `shockwaves-lab` then references them like any other
+image. NEMESIS lists the registry as insecure because it is served over plain
+HTTP, and the root `docker-deploy` wrapper runs `make upgrade` (pull + up) so a
+repushed `:latest` is actually picked up.
+
 **Secrets: sops-nix** (age). Ciphertext is safe to commit publicly.
 
 *Layout — one policy, many files:*
