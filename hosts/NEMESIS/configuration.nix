@@ -190,6 +190,18 @@
       };
     };
 
+    virtualHosts."frigate.nemesis.home.arpa" = {
+      locations."/" = {
+        # 8971 is Frigate's authenticated UI/API (5000 is unauthenticated and
+        # meant for the internal docker network only).
+        proxyPass = "http://127.0.0.1:8971";
+        proxyWebsockets = true;
+        extraConfig = ''
+          client_max_body_size 1G;
+        '';
+      };
+    };
+
     virtualHosts."vector-prime.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8912";
