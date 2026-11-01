@@ -47,6 +47,11 @@
         "XF86MonBrightnessUp" = "exec brightnessctl set 5%+";
 
         "Mod4+Print" = ''exec sh -c 'grim -g "$(slurp -d)" - | wl-copy -t image/png' '';
+
+        # kpmenu (keepass)
+        "Mod4+v" = "exec ${pkgs.kpmenu}/bin/kpmenu";
+        "Mod4+Shift+v" = "exec ${pkgs.kpmenu}/bin/kpmenu type";
+        "Mod4+Shift+Return" = "exec ${pkgs.kpmenu}/bin/kpmenu view";
       };
 
       output = {

@@ -49,11 +49,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793378733,
-        "narHash": "sha256-kxPVvothd/a8BWS7ApOtflnU+9z8l3vBXL6Q8Zu/8kA=",
+        "lastModified": 1793544644,
+        "narHash": "sha256-zli3rMAgGf7QCrZ6Tv15qHGmAunbJUqfXf55ZmJNiPc=",
         "ref": "refs/heads/master",
-        "rev": "d3729639224256fd7f8fa7a230206dee4ac20c11",
-        "revCount": 12,
+        "rev": "0f3d9902783ff21b9613a1d6c1fb215e1353d40b",
+        "revCount": 14,
         "type": "git",
         "url": "http://git.nemesis.home.arpa/jerome/kpmenu"
       },

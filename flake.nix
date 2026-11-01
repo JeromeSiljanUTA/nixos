@@ -39,15 +39,26 @@
     stevenblack-hosts,
     sops-nix,
     kpmenu,
-  }: {
+  }: let
+    overlays = [
+      nur.overlays.default
+      kpmenu.overlays.default
+    ];
+
+    homeManagerDefaults = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      sharedModules = [
+        kpmenu.homeManagerModules.default
+      ];
+    };
+  in {
     nixosConfigurations.BREAKDOWN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
 
       modules = [
         ({...}: {
-          nixpkgs.overlays = [
-            nur.overlays.default
-          ];
+          nixpkgs.overlays = overlays;
         })
         ./hosts/BREAKDOWN/configuration.nix
         sops-nix.nixosModules.sops
@@ -55,15 +66,16 @@
         home-manager.nixosModules.home-manager
 
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.jerome = {
-            imports = [
-              ./home/jerome.nix
-              ./home/hosts/BREAKDOWN.nix
-            ];
-          };
+          home-manager =
+            homeManagerDefaults
+            // {
+              users.jerome = {
+                imports = [
+                  ./home/jerome.nix
+                  ./home/hosts/BREAKDOWN.nix
+                ];
+              };
+            };
         }
       ];
     };
@@ -73,9 +85,7 @@
 
       modules = [
         ({...}: {
-          nixpkgs.overlays = [
-            nur.overlays.default
-          ];
+          nixpkgs.overlays = overlays;
         })
         ./hosts/STARSCREAM/configuration.nix
         sops-nix.nixosModules.sops
@@ -83,24 +93,16 @@
         home-manager.nixosModules.home-manager
 
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.jerome = {
-            imports = [
-              ./home/jerome.nix
-              ./home/hosts/STARSCREAM.nix
-              kpmenu.homeManagerModules.default
-            ];
-
-            programs.kpmenu = {
-              enable = true;
-              database = "~/keepass/Database.kdbx";
-              keybinding = null;
-              typeKeybinding = null;
-              viewKeybinding = "Mod4+v";
+          home-manager =
+            homeManagerDefaults
+            // {
+              users.jerome = {
+                imports = [
+                  ./home/jerome.nix
+                  ./home/hosts/STARSCREAM.nix
+                ];
+              };
             };
-          };
         }
       ];
     };
@@ -108,20 +110,18 @@
     nixosConfigurations.MEGATRON = nixpkgs.lib.nixosSystem {
       modules = [
         ({...}: {
-          nixpkgs.overlays = [
-            nur.overlays.default
-          ];
+          nixpkgs.overlays = overlays;
         })
         ./hosts/MEGATRON/configuration.nix
 
         home-manager.nixosModules.home-manager
 
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.jerome =
-            import ./home/jerome.nix;
+          home-manager =
+            homeManagerDefaults
+            // {
+              users.jerome = import ./home/jerome.nix;
+            };
         }
       ];
     };
@@ -129,9 +129,7 @@
     nixosConfigurations.NEMESIS = nixpkgs.lib.nixosSystem {
       modules = [
         ({...}: {
-          nixpkgs.overlays = [
-            nur.overlays.default
-          ];
+          nixpkgs.overlays = overlays;
         })
         ./hosts/NEMESIS/configuration.nix
         sops-nix.nixosModules.sops
@@ -139,11 +137,11 @@
         home-manager.nixosModules.home-manager
 
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.jerome =
-            import ./home/jerome.nix;
+          home-manager =
+            homeManagerDefaults
+            // {
+              users.jerome = import ./home/jerome.nix;
+            };
         }
       ];
     };
@@ -155,20 +153,18 @@
 
       modules = [
         ({...}: {
-          nixpkgs.overlays = [
-            nur.overlays.default
-          ];
+          nixpkgs.overlays = overlays;
         })
         ./hosts/MIRAGE/configuration.nix
 
         home-manager.nixosModules.home-manager
 
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.jerome =
-            import ./home/jerome.nix;
+          home-manager =
+            homeManagerDefaults
+            // {
+              users.jerome = import ./home/jerome.nix;
+            };
         }
       ];
     };

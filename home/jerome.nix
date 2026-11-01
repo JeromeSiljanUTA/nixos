@@ -8,6 +8,7 @@
     ./common/foot.nix
     ./common/gammastep.nix
     ./common/git.nix
+    ./common/kpmenu.nix
     ./common/sway.nix
   ];
   home.username = "jerome";
