@@ -9,7 +9,11 @@
     ./common/gammastep.nix
     ./common/git.nix
     ./common/kpmenu.nix
+    ./common/mako.nix
     ./common/sway.nix
+    ./common/theme.nix
+    ./common/waybar.nix
+    ./common/wofi.nix
   ];
   home.username = "jerome";
   home.homeDirectory = "/home/jerome";

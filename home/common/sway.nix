@@ -1,25 +1,46 @@
 {
   config,
+  lib,
   pkgs,
   ...
-}: {
+}: let
+  theme = config.myTheme;
+in {
   wayland.windowManager.sway = {
     enable = true;
+
+    # Static colours and bar emitted by home-manager are overridden by this
+    # include; the file behind it is swapped by the `theme` command.
+    extraConfig = "include ${config.home.homeDirectory}/.local/state/theme/current/sway";
 
     config = {
       modifier = "Mod4"; # Super
 
-      terminal = "foot";
+      terminal = "footclient";
       menu = "wofi --show drun";
+
+      # Waybar replaces the stock swaybar.
+      bars = [];
+
+      fonts = {
+        names = [theme.uiFont theme.iconFont];
+        size = 10.0;
+      };
+
+      startup = [
+        {command = "${theme.command}/bin/theme apply";}
+      ];
 
       keybindings = {
         "Mod4+Tab" = "workspace back_and_forth";
-        "Mod4+Return" = "exec foot";
+        "Mod4+Return" = "exec footclient";
         "Mod4+Shift+c" = "kill";
         "Mod4+n" = "exec wofi --show drun";
         "Mod4+w" = "layout toggle tabbed split";
+        "Mod4+Shift+t" = "exec ${theme.command}/bin/theme toggle";
 
-        # workspaces
+        # workspaces (names stay numeric so sway keeps home-row order; the bar
+        # strips the number and shows only the letter)
         "Mod4+a" = "workspace 1:a";
         "Mod4+s" = "workspace 2:s";
         "Mod4+d" = "workspace 3:d";

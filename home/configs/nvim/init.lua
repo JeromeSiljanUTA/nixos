@@ -15,6 +15,27 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- `theme` switches foot between the light and dark palettes and records the
+-- active mode here. Follow it so the editor background matches the terminal
+-- background, including the padding pixels foot paints around the grid.
+local function readThemeMode()
+	local file = io.open(vim.fn.expand("~/.local/state/theme/mode"), "r")
+	if not file then
+		return nil
+	end
+	local mode = file:read("*l")
+	file:close()
+	if mode == "light" or mode == "dark" then
+		return mode
+	end
+	return nil
+end
+
+local initialThemeMode = readThemeMode()
+if initialThemeMode then
+	vim.opt.background = initialThemeMode
+end
+
 require("lazy").setup({
 	spec = {
 		{
@@ -120,6 +141,21 @@ require("lazy").setup({
 		enabled = true,
 	},
 })
+
+-- `theme` runs out-of-process, so poll the mode file rather than relying on a
+-- signal; this keeps an already-running editor in sync after a toggle.
+local themeTimer = vim.uv.new_timer()
+themeTimer:start(
+	1000,
+	2000,
+	vim.schedule_wrap(function()
+		local mode = readThemeMode()
+		if mode and vim.o.background ~= mode then
+			vim.o.background = mode
+			pcall(vim.cmd.colorscheme, "gruvbox")
+		end
+	end)
+)
 
 vim.opt.relativenumber = true
 vim.opt.number = true
