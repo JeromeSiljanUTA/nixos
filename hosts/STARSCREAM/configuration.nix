@@ -43,9 +43,10 @@
   services.netbird.enable = true;
 
   # syncthing default ports: 22000/tcp (transfer), 22000/udp (quic), 21027/udp (discovery)
+  # localsend: 53317/tcp (HTTPS API + transfer), 53317/udp (multicast discovery)
   networking.firewall = {
-    allowedTCPPorts = [8912 22000];
-    allowedUDPPorts = [21027 22000];
+    allowedTCPPorts = [8912 22000 53317];
+    allowedUDPPorts = [21027 22000 53317];
   };
 
   sops = {

@@ -3,6 +3,10 @@
   pkgs,
   ...
 }: {
+  home.packages = with pkgs; [
+    localsend
+  ];
+
   programs.firefox = {
     profiles.default.settings = {
       "media.ffmpeg.vaapi.enabled" = true;
