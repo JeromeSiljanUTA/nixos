@@ -38,7 +38,8 @@ in {
     server.enable = true;
     settings = {
       main = {
-        font = "${cfg.monoFont}:size=8";
+        # The Mono symbols variant keeps fallback icon glyphs aligned to the terminal cell grid.
+        font = "${cfg.monoFont}:size=8, ${cfg.iconFont} Mono:size=8";
         dpi-aware = "yes";
         initial-color-theme = cfg.defaultMode;
       };

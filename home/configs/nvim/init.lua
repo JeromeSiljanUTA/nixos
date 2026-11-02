@@ -46,6 +46,14 @@ require("lazy").setup({
 			end,
 		},
 		{
+			"nvim-lualine/lualine.nvim",
+			opts = {
+				options = {
+					globalstatus = true,
+				},
+			},
+		},
+		{
 			"folke/zen-mode.nvim",
 		},
 		{
@@ -159,6 +167,9 @@ themeTimer:start(
 
 vim.opt.relativenumber = true
 vim.opt.number = true
+vim.opt.showmode = false
+vim.opt.cmdheight = 0
+vim.opt.laststatus = 3
 
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
