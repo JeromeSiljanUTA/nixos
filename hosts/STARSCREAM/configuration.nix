@@ -25,6 +25,16 @@
   # Must be at least the installed RAM for the hibernation image to fit.
   myHibernate.swapSize = 16 * 1024;
 
+  # Hibernate automatically when the battery drops to 5%. UPower requires the
+  # critical level to be strictly above the action level, otherwise it silently
+  # falls back to the defaults (action at 2%).
+  services.upower = {
+    enable = true;
+    percentageCritical = 6;
+    percentageAction = 5;
+    criticalPowerAction = "Hibernate";
+  };
+
   networking.hostName = "STARSCREAM";
   networking.wireless.iwd.enable = true;
 
