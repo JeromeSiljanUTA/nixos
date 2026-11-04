@@ -9,7 +9,7 @@
     height=420
     location=center
     orientation=vertical
-    halign=center
+    halign=fill
     line_wrap=word
     dynamic_lines=true
     matching=fuzzy

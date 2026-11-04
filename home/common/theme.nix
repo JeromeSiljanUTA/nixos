@@ -129,19 +129,22 @@
     window {
       background-color: transparent;
       color: @fg;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     #outer-box {
       background-color: @bg;
       border: 2px solid @accent;
       border-radius: 10px;
+      box-shadow: none;
     }
 
     #input {
-      margin: 8px;
+      margin: 8px 0;
       padding: 8px;
       border: 1px solid @bg1;
-      border-radius: 6px;
+      border-radius: 0;
       background-color: @bg1;
       color: @fg;
     }
@@ -155,14 +158,14 @@
     }
 
     #entry {
-      margin: 2px 8px;
+      margin: 2px 0;
       padding: 6px;
-      border-radius: 6px;
+      border-radius: 0;
     }
 
     #entry:selected {
-      background-color: @accent;
-      color: @accent-fg;
+      background-color: alpha(@accent, 0.3);
+      color: @fg;
     }
 
     #text {
@@ -170,11 +173,11 @@
     }
 
     #text:selected {
-      color: @accent-fg;
+      color: @fg;
     }
 
     #scroll {
-      margin: 0 8px;
+      margin: 0;
     }
   '';
 
