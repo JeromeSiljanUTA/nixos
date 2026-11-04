@@ -22,7 +22,7 @@ in {
         height = theme.barHeight;
         spacing = 4;
 
-        modules-left = ["sway/workspaces" "sway/mode" "sway/window"];
+        modules-left = ["sway/workspaces" "sway/mode"];
         modules-center = ["clock"];
         modules-right = ["custom/theme" "backlight" "battery" "network" "pulseaudio" "tray"];
 
