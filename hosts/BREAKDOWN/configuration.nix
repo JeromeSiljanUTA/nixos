@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common/desktop/sway.nix
+    ../../common/hardware/hibernate.nix
     ../../common/utils/utils.nix
   ];
 
@@ -14,6 +15,9 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # Must be at least the installed RAM for the hibernation image to fit.
+  myHibernate.swapSize = 16 * 1024;
 
   networking.hostName = "BREAKDOWN";
   networking.wireless.iwd.enable = true;

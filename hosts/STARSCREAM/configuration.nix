@@ -8,6 +8,7 @@
     ./hardware-configuration.nix
     ../../common/desktop/sway.nix
     ../../common/hardware/android_adb.nix
+    ../../common/hardware/hibernate.nix
     ../../common/hardware/scanner.nix
     ../../common/utils/utils.nix
   ];
@@ -21,20 +22,8 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Hibernate to a swapfile on the LUKS-encrypted btrfs root. Because the root
-  # is already unlocked with a passphrase in initrd, the swapfile is encrypted
-  # at rest and that same key is required to resume. systemd in stage 1 records
-  # the swapfile's device and offset in the HibernateLocation EFI variable, so
-  # no resume=/resume_offset= kernel parameters are needed.
-  boot.initrd.systemd.enable = true;
-
-  swapDevices = [
-    {
-      device = "/swapfile";
-      # Must be at least the installed RAM for the hibernation image to fit.
-      size = 16 * 1024;
-    }
-  ];
+  # Must be at least the installed RAM for the hibernation image to fit.
+  myHibernate.swapSize = 16 * 1024;
 
   networking.hostName = "STARSCREAM";
   networking.wireless.iwd.enable = true;
