@@ -141,16 +141,14 @@
     }
 
     #input {
-      margin: 8px 0;
+      margin: 8px;
       padding: 8px;
       border: 1px solid @bg1;
-      border-radius: 0;
+      border-radius: 6px;
       background-color: @bg1;
       color: @fg;
-    }
-
-    #input:focus {
-      border-color: @accent;
+      box-shadow: none;
+      outline: none;
     }
 
     #inner-box {
