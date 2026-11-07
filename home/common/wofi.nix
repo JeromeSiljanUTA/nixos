@@ -12,6 +12,7 @@
     halign=fill
     line_wrap=word
     dynamic_lines=true
+    insensitive=true
     matching=fuzzy
   '';
 }

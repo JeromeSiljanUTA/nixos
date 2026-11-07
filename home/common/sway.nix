@@ -5,6 +5,22 @@
   ...
 }: let
   theme = config.myTheme;
+
+  powerMenu = pkgs.writeShellApplication {
+    name = "power-menu";
+    runtimeInputs = with pkgs; [wofi systemd];
+    text = ''
+      chosen="$(printf '%s\n' ' Suspend' ' Hibernate' ' Reboot' ' Power Off' | wofi --show dmenu --prompt 'Power' --lines 4 --width 240 --height 200 || true)"
+
+      case "$chosen" in
+        *Suspend*) systemctl suspend ;;
+        *Hibernate*) systemctl hibernate ;;
+        *Reboot*) systemctl reboot ;;
+        *"Power Off"*) systemctl poweroff ;;
+        *) exit 0 ;;
+      esac
+    '';
+  };
 in {
   wayland.windowManager.sway = {
     enable = true;
@@ -71,6 +87,8 @@ in {
 
         # kpmenu (keepass)
         "Mod4+v" = "exec ${pkgs.kpmenu}/bin/kpmenu view";
+
+        "Mod4+e" = "exec ${powerMenu}/bin/power-menu";
       };
 
       output = {
@@ -89,4 +107,6 @@ in {
       };
     };
   };
+
+  home.packages = [powerMenu];
 }
