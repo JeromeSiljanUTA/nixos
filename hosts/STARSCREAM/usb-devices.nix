@@ -13,7 +13,7 @@
     {
       name = "Samsung phones in download mode (samloader / Odin)";
       vendorId = "04e8";
-      tag = "uaccess";
+      mode = "0666";
     }
   ];
 
