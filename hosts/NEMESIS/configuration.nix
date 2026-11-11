@@ -75,6 +75,7 @@
 
   services.nginx = {
     enable = true;
+    recommendedProxySettings = true;
 
     virtualHosts."nemesis.home.arpa" = {
       locations."/" = {
@@ -97,9 +98,6 @@
       locations."/" = {
         proxyPass = "http://127.0.0.1:3001";
         proxyWebsockets = true;
-        # Gitea validates that the detected public URL matches ROOT_URL.
-        # Without these headers, Gitea reports as a ROOT_URL mismatch.
-        recommendedProxySettings = true;
         extraConfig = ''
           client_max_body_size 1G;
         '';
