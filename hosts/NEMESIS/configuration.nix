@@ -256,6 +256,8 @@
       woodpecker_gitea_client_secret = {};
       woodpecker_webhook_secret = {};
       woodpecker_gitea_token = {};
+      vector_prime_keystore_jks = {};
+      vector_prime_keystore_password = {};
     };
   };
 

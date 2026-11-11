@@ -93,10 +93,20 @@
       [ -f "$repo/$svc/docker-compose.yml" ] || { echo "no compose for $svc" >&2; exit 1; }
       echo "==> redeploy $svc"
       # We are already root here; pass DOCKER so the Makefile does not nest sudo.
-      ${makeBin} upgrade SERVICE="$svc" DOCKER=${config.virtualisation.docker.package}/bin/docker
+      ${makeBin} deploy SERVICE="$svc" DOCKER=${config.virtualisation.docker.package}/bin/docker
     done < "$list"
   '';
   dockerComposeWrapperPath = "/run/woodpecker/docker-deploy";
+
+  # Force the F-Droid builder to ingest freshly uploaded APKs and rebuild the
+  # repo index immediately, rather than waiting for its periodic timer.
+  fdroidRebuild = pkgs.writeShellScript "woodpecker-fdroid-rebuild" ''
+    #!${pkgs.bash}/bin/bash
+    set -eu
+    exec ${config.virtualisation.docker.package}/bin/docker \
+      exec fdroid bash /updates-scripts/10-ingest-uploads.sh
+  '';
+  fdroidRebuildWrapperPath = "/run/woodpecker/fdroid-rebuild";
 in {
   # Expose the wrappers as REAL root-owned files (not symlinks) at fixed
   # paths. sudo canonicalizes symlinks against the store before matching, which
@@ -104,6 +114,7 @@ in {
   systemd.tmpfiles.rules = [
     "C+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
     "C+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
+    "C+ ${fdroidRebuildWrapperPath} 0755 root root - ${fdroidRebuild}"
     "d /iacon/containers 2775 jerome shockwaves -"
     "Z ${deployRepo} 2775 jerome shockwaves -"
     "f ${deployListPath} 0664 ${ciUser} shockwaves -"
@@ -135,6 +146,11 @@ in {
           command = dockerComposeWrapperPath;
           options = ["NOPASSWD"];
         }
+        {
+          # Force an F-Droid ingest + index rebuild. No arguments.
+          command = fdroidRebuildWrapperPath;
+          options = ["NOPASSWD"];
+        }
       ];
     }
   ];
@@ -157,6 +173,8 @@ in {
     content = ''
       WOODPECKER_AGENT_SECRET=${agentSecret}
       DEPLOY_GIT_TOKEN=${config.sops.placeholder.woodpecker_gitea_token}
+      VECTOR_PRIME_KEYSTORE_JKS=${config.sops.placeholder.vector_prime_keystore_jks}
+      VECTOR_PRIME_KEYSTORE_PASSWORD=${config.sops.placeholder.vector_prime_keystore_password}
     '';
     owner = ciUser;
     group = ciUser;
