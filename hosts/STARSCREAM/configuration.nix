@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ./usb-devices.nix
     ../../common/desktop/sway.nix
     ../../common/hardware/android_adb.nix
     ../../common/hardware/hibernate.nix
@@ -13,9 +14,6 @@
     ../../common/utils/utils.nix
   ];
   programs.nix-ld.enable = true;
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d00e", MODE="0666"
-  '';
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
