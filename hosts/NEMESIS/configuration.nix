@@ -75,7 +75,6 @@
 
   services.nginx = {
     enable = true;
-    recommendedProxySettings = true;
 
     virtualHosts."nemesis.home.arpa" = {
       locations."/" = {
@@ -97,6 +96,7 @@
     virtualHosts."git.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:3001";
+        recommendedProxySettings = true;
         proxyWebsockets = true;
         extraConfig = ''
           client_max_body_size 1G;
