@@ -29,6 +29,10 @@
       url = "git+http://git.nemesis.home.arpa/jerome/kpmenu";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Forge intentionally keeps its own nixpkgs unstable input so OpenSCAD
+    # and OrcaSlicer stay on the latest versions.
+    forge.url = "git+http://git.nemesis.home.arpa/jerome/forge";
   };
 
   outputs = {
@@ -39,6 +43,7 @@
     stevenblack-hosts,
     sops-nix,
     kpmenu,
+    forge,
   }: let
     overlays = [
       nur.overlays.default
@@ -50,6 +55,7 @@
       useUserPackages = true;
       sharedModules = [
         kpmenu.homeManagerModules.default
+        forge.homeManagerModules.default
       ];
     };
   in {
@@ -73,6 +79,7 @@
                 imports = [
                   ./home/jerome.nix
                   ./home/hosts/BREAKDOWN.nix
+                  forge.homeManagerModules.example
                 ];
               };
             };
@@ -100,6 +107,7 @@
                 imports = [
                   ./home/jerome.nix
                   ./home/hosts/STARSCREAM.nix
+                  forge.homeManagerModules.example
                 ];
               };
             };
@@ -120,7 +128,12 @@
           home-manager =
             homeManagerDefaults
             // {
-              users.jerome = import ./home/jerome.nix;
+              users.jerome = {
+                imports = [
+                  ./home/jerome.nix
+                  forge.homeManagerModules.example
+                ];
+              };
             };
         }
       ];
