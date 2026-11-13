@@ -43,7 +43,8 @@
   users.users.jerome = {
     isNormalUser = true;
     description = "Jerome Siljan";
-    extraGroups = ["wheel" "video"];
+    # dialout owns /dev/ttyACM* and /dev/ttyUSB* (ESP32-C3 flashing).
+    extraGroups = ["wheel" "video" "dialout"];
     packages = with pkgs; [];
   };
 
@@ -57,7 +58,7 @@
   # syncthing default ports: 22000/tcp (transfer), 22000/udp (quic), 21027/udp (discovery)
   # localsend: 53317/tcp (HTTPS API + transfer), 53317/udp (multicast discovery)
   networking.firewall = {
-    allowedTCPPorts = [8912 22000 53317];
+    allowedTCPPorts = [8000 8912 22000 53317];
     allowedUDPPorts = [21027 22000 53317];
   };
 
