@@ -20,6 +20,11 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Guarantees the Thunderbolt domain reports iommu_dma_protection, which is what
+  # lets boltd auto-enroll and auto-authorize a hot-plugged dock; iommu=pt keeps
+  # the identity-mapped fast path for everything else.
+  boot.kernelParams = ["intel_iommu=on" "iommu=pt"];
+
   # Must be at least the installed RAM for the hibernation image to fit.
   myHibernate.swapSize = 16 * 1024;
 
@@ -74,6 +79,11 @@
   };
 
   security.polkit.enable = true;
+
+  # At Thunderbolt security "user" a dock present at boot is tunnelled by the
+  # firmware's pre-boot ACL, but a hot-plugged one is only authorized in
+  # userspace by boltd; with no daemon, the USB behind the dock never enumerates.
+  services.hardware.bolt.enable = true;
 
   hardware.graphics = {
     enable = true;
