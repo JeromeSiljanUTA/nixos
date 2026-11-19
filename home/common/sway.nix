@@ -8,12 +8,13 @@
 
   powerMenu = pkgs.writeShellApplication {
     name = "power-menu";
-    runtimeInputs = with pkgs; [wofi systemd];
+    runtimeInputs = with pkgs; [wofi systemd libnotify];
     text = ''
-      chosen="$(printf '%s\n' ' Suspend' ' Hibernate' ' Reboot' ' Power Off' | wofi --show dmenu --prompt 'Power' --lines 4 --width 240 --height 200 || true)"
+      chosen="$(printf '%s\n' ' Suspend' ' Hybrid Sleep' ' Hibernate' ' Reboot' ' Power Off' | wofi --show dmenu --prompt 'Power' --lines 5 --width 240 --height 240 || true)"
 
       case "$chosen" in
         *Suspend*) systemctl suspend ;;
+        *"Hybrid Sleep"*) systemctl hybrid-sleep || notify-send -a power-menu 'Hybrid sleep failed' 'see journalctl -b -u systemd-hybrid-sleep' ;;
         *Hibernate*) systemctl hibernate ;;
         *Reboot*) systemctl reboot ;;
         *"Power Off"*) systemctl poweroff ;;

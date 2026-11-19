@@ -25,8 +25,7 @@
   # the identity-mapped fast path for everything else.
   boot.kernelParams = ["intel_iommu=on" "iommu=pt"];
 
-  # Must be at least the installed RAM for the hibernation image to fit.
-  myHibernate.swapSize = 16 * 1024;
+  myHibernate.swapSize = 40 * 1024;
 
   # Hibernate automatically when the battery drops to 5%. UPower requires the
   # critical level to be strictly above the action level, otherwise it silently
