@@ -210,6 +210,13 @@
       };
     };
 
+    virtualHosts."grafana.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:3030";
+        proxyWebsockets = true;
+      };
+    };
+
     virtualHosts."matrix.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8008";
