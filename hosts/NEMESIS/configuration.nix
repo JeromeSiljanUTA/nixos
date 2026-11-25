@@ -214,6 +214,8 @@
       locations."/" = {
         proxyPass = "http://127.0.0.1:3030";
         proxyWebsockets = true;
+        # Grafana's CSRF check needs the original Host header.
+        recommendedProxySettings = true;
       };
     };
 
