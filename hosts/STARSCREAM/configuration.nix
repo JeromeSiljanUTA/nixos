@@ -23,7 +23,9 @@
   # Guarantees the Thunderbolt domain reports iommu_dma_protection, which is what
   # lets boltd auto-enroll and auto-authorize a hot-plugged dock; iommu=pt keeps
   # the identity-mapped fast path for everything else.
-  boot.kernelParams = ["intel_iommu=on" "iommu=pt"];
+  # Prefer ACPI S3 over s2idle: s2idle keeps more of the SoC powered and is
+  # noticeably worse for overnight battery drain on this ThinkPad.
+  boot.kernelParams = ["intel_iommu=on" "iommu=pt" "mem_sleep_default=deep"];
 
   myHibernate.swapSize = 40 * 1024;
 
