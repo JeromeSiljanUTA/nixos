@@ -25,6 +25,26 @@
   networking.firewall.allowedTCPPorts = [22 80 81 2222 3000 5000 8000 8001 8002 8003 8084 8096 8123 9091 29170];
   networking.firewall.allowPing = true;
 
+  # Matter/Thread discovery is mDNS on the LAN. Matter itself uses ephemeral
+  # UDP ports that must stay open (do not add port rules for it), but the
+  # multicast announcements have to be allowed in.
+  networking.firewall.allowedUDPPorts = [5353];
+
+  # The OTBR container forwards between wpan0 and the LAN, which the host
+  # kernel does; accept_ra stays at 2 so RAs from MIRAGE are still processed
+  # while forwarding is on.
+  boot.kernel.sysctl = {
+    "net.ipv6.conf.all.forwarding" = 1;
+    "net.ipv6.conf.all.accept_ra" = 2;
+    # Matter controllers keep subscriptions open across long report intervals;
+    # the 120s conntrack default drops reports from battery (sleepy) devices.
+    # Upstream asks for >= 3700 on both, and the module has to be loaded before
+    # these keys exist.
+    "net.netfilter.nf_conntrack_udp_timeout" = 3700;
+    "net.netfilter.nf_conntrack_udp_timeout_stream" = 3700;
+  };
+  boot.kernelModules = ["nf_conntrack"];
+
   networking.firewall.extraCommands = ''
     iptables -I DOCKER-USER -i docker0 -o wt0 -j DROP
   '';
@@ -114,6 +134,15 @@
     virtualHosts."lubelogger.nemesis.home.arpa" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8084";
+        proxyWebsockets = true;
+      };
+    };
+
+    # Matter server dashboard: used to commission devices (the HA Companion
+    # app cannot do it without Play Services) and to paste the Thread dataset.
+    virtualHosts."matter.nemesis.home.arpa" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:5580";
         proxyWebsockets = true;
       };
     };
