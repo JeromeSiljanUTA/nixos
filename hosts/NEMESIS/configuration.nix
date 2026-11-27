@@ -74,6 +74,15 @@
     };
   };
 
+  # Matter/Thread commissioning: the Matter server hands a new device its
+  # Thread credentials over BLE, so it needs the onboard AX201 radio through
+  # bluetoothd (the container speaks to it over D-Bus). Pairing is the only
+  # thing that uses BLE; afterwards devices talk IPv6.
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
   # needed for gpu + docker
   hardware.graphics = {
     enable = true;
