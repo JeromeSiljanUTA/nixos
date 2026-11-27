@@ -108,13 +108,18 @@
   '';
   fdroidRebuildWrapperPath = "/run/woodpecker/fdroid-rebuild";
 in {
-  # Expose the wrappers as REAL root-owned files (not symlinks) at fixed
-  # paths. sudo canonicalizes symlinks against the store before matching, which
-  # would break the sudoers rule; a regular file avoids that.
+  # Expose the wrappers at fixed paths as symlinks into the store. `C+` is
+  # wrong here: it only copies when the destination is missing, so the file
+  # created by the first activation is never replaced and the pipelines keep
+  # executing a stale script after the config changes. `L+` always points at
+  # the current store path. sudo canonicalizes symlinks before matching, so the
+  # sudoers rules below name the store paths; the fixed paths stay listed so a
+  # partially applied activation (tmpfiles and /etc updated separately) cannot
+  # lock the CI out of sudo.
   systemd.tmpfiles.rules = [
-    "C+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
-    "C+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
-    "C+ ${fdroidRebuildWrapperPath} 0755 root root - ${fdroidRebuild}"
+    "L+ ${rebuildWrapperPath} 0755 root root - ${rebuildWrapper}"
+    "L+ ${dockerComposeWrapperPath} 0755 root root - ${dockerComposePath}"
+    "L+ ${fdroidRebuildWrapperPath} 0755 root root - ${fdroidRebuild}"
     "d /iacon/containers 2775 jerome shockwaves -"
     "Z ${deployRepo} 2775 jerome shockwaves -"
     "f ${deployListPath} 0664 ${ciUser} shockwaves -"
@@ -136,18 +141,32 @@ in {
       commands = [
         {
           # Only the wrapper; no arbitrary args.
-          command = rebuildWrapperPath;
+          command = "${rebuildWrapper}";
           options = ["NOPASSWD"];
         }
         {
           # Redeploy via the Makefile. NO arguments: the wrapper reads the
           # service list from a fixed CI-owned file, so nothing
           # caller-controlled crosses the sudo boundary.
-          command = dockerComposeWrapperPath;
+          command = "${dockerComposePath}";
           options = ["NOPASSWD"];
         }
         {
           # Force an F-Droid ingest + index rebuild. No arguments.
+          command = "${fdroidRebuild}";
+          options = ["NOPASSWD"];
+        }
+        {
+          # The same wrappers addressed through their stable symlinks, for the
+          # activation where tmpfiles has not replaced the old regular files.
+          command = rebuildWrapperPath;
+          options = ["NOPASSWD"];
+        }
+        {
+          command = dockerComposeWrapperPath;
+          options = ["NOPASSWD"];
+        }
+        {
           command = fdroidRebuildWrapperPath;
           options = ["NOPASSWD"];
         }
